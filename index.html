@@ -310,7 +310,7 @@ body::after{content:'';position:fixed;inset:0;z-index:60;pointer-events:none;opa
 <div class="bg"></div>
 <canvas id="confetti"></canvas>
 <div class="app">
-  <div class="brand"><div class="logo">🎉</div><div><h1>PARTY <span>PACK</span></h1><div class="tag" id="appTag">👥 2–8 PLAYERS · 5 MINI-GAMES</div></div></div>
+  <div class="brand"><div class="logo">🎉</div><div><h1>PARTY <span>PACK</span></h1><div class="tag" id="appTag">👥 2–10 PLAYERS · 5 MINI-GAMES</div></div></div>
   <div class="scorestrip" id="scoreStrip" style="display:none;margin-top:12px"></div>
 
   <div id="s-lang" class="screen active">
@@ -330,7 +330,8 @@ body::after{content:'';position:fixed;inset:0;z-index:60;pointer-events:none;opa
     <div class="steps"><span class="stepdot on"></span><span class="stepdot on"></span><span class="stepdot"></span></div>
     <div class="wiztitle" id="gTitle">Step 3 — Pick a game</div>
     <div class="wizsub" id="gSub">Choose one game to play</div>
-    <button class="btn blue big" id="onlineBtn" onclick="showOnlineMenu()">🌐 Online</button>
+    <div id="onlineBtnWrap"><button class="btn blue big" id="onlineBtn" onclick="showOnline()">🌐 Online</button></div>
+    <button class="btn green big" id="quickBtn" onclick="quickPlay()">▶</button>
     <div id="gameList"></div>
     <button class="btn green big" id="tqStart" style="display:none" onclick="tqStartSelect()">▶</button>
     <div class="row"><button class="btn ghost" id="gBack" onclick="show('s-lang')">← Back</button><button class="btn pink" id="tqBtn" onclick="toggleTourney()">🏆</button></div>
@@ -342,13 +343,15 @@ body::after{content:'';position:fixed;inset:0;z-index:60;pointer-events:none;opa
     <div class="wizsub" id="mGame">…</div>
     <button class="bigchoice" onclick="pickMode('local')"><span class="ic" id="mLocalIc"></span><span><h3 id="mLocal">Same device</h3><p id="mLocalS">Friends share this screen</p></span></button>
     <button class="bigchoice" onclick="pickMode('online')"><span class="ic" id="mOnlineIc"></span><span><h3 id="mOnline">Online room</h3><p id="mOnlineS">Everyone on their own phone</p></span></button>
+    <button class="bigchoice" id="soloBtn" style="display:none" onclick="pickMode('solo')"><span class="ic">🤖</span><span><h3 id="mSolo">Solo</h3><p id="mSoloS"></p></span></button>
     <button class="btn ghost" id="mBack" onclick="showGames()">← Back</button>
   </div>
 
   <div id="s-setup" class="screen">
-    <div class="howto"><h4 id="suTitle">📝 ADD PLAYERS (2–8)</h4><ol><li id="su1">Type each name.</li><li id="su2">Remember your key.</li></ol></div>
+    <div class="howto"><h4 id="suTitle">📝 ADD PLAYERS (2–10)</h4><ol><li id="su1">Type each name.</li><li id="su2">Remember your key.</li></ol></div>
     <div id="nameList"></div>
-    <div class="row"><button class="btn ghost" id="suAdd" onclick="addNameField()">+ Add</button><button class="btn ghost" onclick="removeNameField()">−</button></div>
+    <div class="row" id="addRow"><button class="btn ghost" id="suAdd" onclick="addNameField()">+ Add</button><button class="btn ghost" onclick="removeNameField()">−</button></div>
+    <div class="howto" id="difRow" style="display:none;text-align:center"><h4 id="difT">Bot</h4><div class="row"><button class="btn ghost" id="dif0" onclick="setDif(0)">1</button><button class="btn ghost" id="dif1" onclick="setDif(1)">2</button><button class="btn ghost" id="dif2" onclick="setDif(2)">3</button></div></div>
     <button class="btn green big" id="suStart" onclick="startLocalGame()">🎉 Start →</button>
     <button class="btn ghost" id="suBack" onclick="show('s-mode')">← Back</button>
   </div>
@@ -357,6 +360,7 @@ body::after{content:'';position:fixed;inset:0;z-index:60;pointer-events:none;opa
     <div class="intro"><div class="big-ic" id="iIcon">⚡</div><h2 id="iName">Reaction Rush</h2><div class="small" id="iTag"></div></div>
     <div class="howto"><h4 id="iHow">📖 HOW TO PLAY</h4><ol id="iSteps"></ol><div class="score-line" id="iScore"></div></div>
     <div id="iKeys" class="keys"></div>
+    <div id="rqBox"></div>
     <button class="btn green big" id="iGo" onclick="introGo()">GO! 🚀</button>
   </div>
 
@@ -558,22 +562,13 @@ body::after{content:'';position:fixed;inset:0;z-index:60;pointer-events:none;opa
     <button class="btn pink big" id="resOther" onclick="backToGames()">🎮</button>
   </div>
 
-  <div id="s-omenu" class="screen">
-    <div class="wiztitle" id="omTitle">Online</div>
-    <div class="wizsub" id="omSub">…</div>
-    <div class="howto" style="text-align:center"><b id="omCur"></b></div>
-    <div id="omList"></div>
-    <div class="row"><button class="btn blue" id="omPickBtn" onclick="renderOnlinePick()">Pick</button><button class="btn orange" id="omSurBtn" onclick="surpriseOnline()">Surprise</button></div>
-    <button class="btn green big" id="omGo" onclick="continueOnline()">→</button>
-    <button class="btn ghost" id="omBack" onclick="showGames()">← Back</button>
-  </div>
-
   <div id="s-online" class="screen">
     <div class="howto" style="margin-top:0;text-align:center"><b id="oGame"></b></div>
     <div class="howto"><h4 id="oHow">🌐 HOW ONLINE WORKS</h4><ol id="oSteps"></ol></div>
     <div class="row"><button class="btn green" id="oCreate" onclick="hostParty()">＋ Create</button><button class="btn orange" id="oJoin" onclick="joinUI()">→ Join</button></div>
-    <div id="hostBox" style="display:none"><div class="small" id="oShare"></div><div class="code" id="roomCode">----</div><div class="small" id="hostStatus"></div><div id="lobbyList"></div><button class="btn pink big" id="hostStartBtn" style="display:none">🎉</button></div>
+    <div id="hostBox" style="display:none"><div class="small" id="oShare"></div><div class="code" id="roomCode">----</div><div class="small" id="hostStatus"></div><div id="omMiniGrid"></div><div class="row"><button class="btn orange" id="omSurBtn" onclick="surpriseOnline()">🎲</button><button class="btn ghost" id="omPartyBtn" onclick="togglePartyMode()">🏆</button></div><button class="btn pink big" id="hostStartBtn" style="display:none">🎉</button></div>
     <div id="joinBox" style="display:none"><input type="text" id="myName" maxlength="12"><input type="text" id="joinCode" maxlength="4"><button class="btn orange big" id="joinBtn" onclick="joinParty()">Connect 📲</button><div class="small" id="joinStatus"></div></div>
+    <div id="lobbyList"></div>
     <div class="log" id="netlog"></div>
     <button class="btn ghost" id="oBack" onclick="show('s-mode')">← Back</button>
   </div>
@@ -594,8 +589,8 @@ body::after{content:'';position:fixed;inset:0;z-index:60;pointer-events:none;opa
 <script>
 // ============ HELPERS ============
 const $=id=>document.getElementById(id);
-const COLORS=['#4ade80','#22d3ee','#fb923c','#f472b6','#a78bfa','#facc15','#f87171','#34d399'];
-const KEYS=['A','S','D','F','J','K','L','G'];
+const COLORS=['#4ade80','#22d3ee','#fb923c','#f472b6','#a78bfa','#facc15','#f87171','#34d399','#e8e4d5','#a3e635','#7dd3fc','#f9a8d4'];
+const KEYS=['A','S','D','F','J','K','L','G','T','R'];
 function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));$(id).classList.add('active')}
 let SOUND=true;try{SOUND=JSON.parse(localStorage.getItem('pp_sound')??'true')}catch(e){SOUND=true}
 function beep(f,d){if(!SOUND)return;try{const a=new(window.AudioContext||window.webkitAudioContext)();const o=a.createOscillator(),g=a.createGain();o.connect(g);g.connect(a.destination);o.frequency.value=f||600;o.type='sine';g.gain.value=.1;o.start();o.stop(a.currentTime+(d||.12))}catch(e){}}
@@ -643,10 +638,10 @@ function stopAll(){timers.forEach(t=>{clearTimeout(t);clearInterval(t)});timers=
 
 // ============ STRINGS: ENGLISH ============
 const STR={en:{
-tag:'👥 2–8 PLAYERS · 15 SKILL GAMES',
+tag:'👥 2–10 PLAYERS · 15 SKILL GAMES',
 gTitle:'Step 2 — Pick a game',gSub:'Choose one game to play',back:'← Back',
-mTitle:'Step 3 — How to play it',mLocal:'Same device',mLocalS:'Friends share this screen',mOnline:'Online room',mOnlineS:'Everyone on their own phone',
-suTitle:'📝 ADD PLAYERS (2–8)',su1:"Type each friend's name.",su2c:'Remember your KEY — smash it in fast games.',su2p:'Tap a KEY box to pick your own key. Keys AND buttons both work!',add:'+ Add',start:'🎉 Start →',
+mTitle:'Step 3 — How to play it',mLocal:'Same device',mLocalS:'Friends share this screen',mOnline:'Online room',mOnlineS:'Everyone on their own phone',solo:'🤖 Solo vs Bot',soloS:'Practice against the computer',difT:'Bot level',difE:'Easy',difM:'Medium',difH:'Hard',
+suTitle:'📝 ADD PLAYERS (2–10)',su1:"Type each friend's name.",su2c:'Remember your KEY — smash it in fast games.',su2p:'Tap a KEY box to pick your own key. Keys AND buttons both work!',add:'+ Add',start:'🎉 Start →',
 go:'Got it — GO! 🚀',how:'📖 HOW TO PLAY',skip:'Skip →',ok:'OK →',again:'🔁 Play again',other:'🎮 Other games',waitHost:'⏳ Waiting for host…',
 roundOf:(r,n)=>`Round ${r} of ${n}`,qOf:(r,n)=>`Question ${r} of ${n}`,
 rWait:'🔴 WAIT…',rWaitC:'Hands off! Press your key ONLY when green.',rWaitP:'Hands off! Tap YOUR button ONLY when green.',rWaitNet:'Wait for GREEN, then TAP the box!',rGo:'🟢 GO!',rGoC:'First KEY wins!',rGoP:'First TAP wins!',rFoul:n=>`🚫 ${n} jumped the gun — out!`,rAllFoul:'💀 Everyone fouled! No points.',rWin:(e,n)=>`🏆 ${e} ${n} wins the round!`,rFast:n=>`${n} was fastest!`,rPts:'Points awarded!',rNoTap:'😴 No taps!',rEarly:'🚫 Too early — fouled out.',rLocked:m=>`⚡ ${m}ms — locked in!`,rWaitOthers:'Waiting for everyone…',
@@ -658,7 +653,7 @@ cHint:'Type a country starting with that letter, then Enter.',cEnNote:'Tip: type
 kStart:'▶ TAP TO START',kMash:'👆 MASH! MASH! MASH!',kGo:'GO GO GO! 🔥',kStep1:n=>`Step 1: ${n}, tap to start ⏱`,kTurn:(e,n)=>`${e} ${n}: mash for 5s!`,kScore:(e,n,c)=>`${e} ${n}: ${c} taps!`,kWin:(e,n,c)=>`🏆 ${e} ${n} wins with ${c} taps!`,kNow:'Mash NOW!',kTime:'Time! Counting…',
 gSecret:(n,r,tot)=>`Round ${r}/${tot}: ${n}, guess secretly 🙈`,gLook:'Others look away! Type 1–100 + lock it.',gLock:'🔒 Lock in my guess',gLocked:(a,b)=>`🔒 Locked! (${a}/${b})`,gBad:'⚠️ Enter a number 1–100!',gTarget:(t,n,g)=>`🎯 Target was ${t}! 🏆 ${n} guessed ${g} — +2`,gTargetH:(t,n)=>`🎯 Target ${t}! 🏆 ${n}`,gYour:(r,tot)=>`Round ${r}/${tot} — your secret guess:`,gClose:'Closest to the hidden target wins.',gReveal:(t,arr)=>`Target ${t}: ${arr}`,gWait:(a,b)=>`Waiting for everyone… (${a}/${b})`,
 wins:n=>`${n} WINS!`,tie:'🤝 TIE!',resSub:g=>`${g} · final scores:`,
-oHow:'🌐 HOW ONLINE WORKS',o1:'One phone taps Create and shares the code.',o2:'Others tap Join, enter name + code.',o3:'Host taps Start — all play together.',create:'＋ Create',join:'→ Join',namePh:'Step 1: YOUR NAME',codePh:'Step 2: 4-LETTER CODE',connect:'Connect 📲',share:'👇 Friends: join with this code',need2:'⏳ Waiting for friends… (need 2+)',ready:n=>`✅ ${n} players! Tap START when all here.`,startBtn:'🎉 Start!',need1:'⏳ Wait for 1 friend to join!',inLobby:n=>`✅ In! Players: ${n}. Wait for host… 🎉`,started:'🎉 Game started!',roomLive:c=>`✅ Room ${c} is live!`,calling:c=>`📞 Calling room ${c}…`,connected:'✅ Connected!',roomNo:'❌ Room not found — check the code!',needCode:'⚠️ Type the 4-letter code first!',needNet:'📡 Online needs internet. Local games work offline!',ourPick:'⭐ OUR PICK',longTag:'⏳ LONG',mins:'min',playersN:'2–8 players',colR:'RED',colG:'GREEN',colB:'BLUE',colY:'YELLOW',stroopHint:'Tap the INK color!',oddHint:'Tap the ODD one out!',aimStop:'STOP!',aimPts:n=>`+${n} pts`,typeAns:'Type the answer + OK',typeHint:'Type it FAST + Enter!',fold:'FOLD',check:'CHECK',callX:n=>`CALL ${n}`,raise:'RAISE +10',peek:'👁 HOLD TO PEEK',pot:'Pot',chipsW:'Chips',ante:n=>`Ante ${n}`,streetN:['Flop','Turn','River'],handN:['High card','Pair','Two pair','Three of a kind','Straight','Flush','Full house','Four of a kind','Straight flush'],showWin:(w,h)=>`${w} wins with ${h}!`,takesPot:w=>`${w} takes the pot!`,foldedN:n=>`${n} folds`,flip:'FLIP!',warCard:(e,n,c)=>`${e} ${n} → ${c}`,watch:'Watch…',repeatGo:'Your turn — repeat!',simSurv:n=>`${n} survives! +1`,lives:m=>`❌ ${m}/6`,hmWin:n=>`${n} solved it! +3`,hmLose:w=>`It was: ${w}`,hold:'HOLD!',blHint:'Release to bank your air!',popped:'💥 POP! 0 pts',banked:n=>`Banked +${n}!`,tourney:'🏆 Tournament',pickT:'Tap games to add them (2–5):',startT:n=>`▶ Start (${n} games)`,need2g:'Pick at least 2 games!',timeUp:'⏱ Time! No point.',nextG:g=>`Next: ${g} →`,seeRes:'🏆 See final results',tourneyWin:n=>`${n} WINS THE TOURNAMENT!`,tourneySub:'total across all games',hardMode:'🔥 HARD',omBanner:'🌐 Online Multiplayer',omTitle:'Online Multiplayer',omSub:'Pick a game, or be surprised — then share the room code.',omPick:'🎮 Pick a game',omSurprise:'🎲 Surprise',omGo:'Continue →',omCur:g=>`Game: ${g}`,omRnd:'🎲 Surprise (random game)',achT:'Achievement',feverMsg:'⚡ FEVER ROUND — double points!',fall:'All',fquick:'Quick',flong:'Long',fpicks:'⭐ Picks',fskill:'🧠 Skill',surprise:'🎲 Surprise me',joined:(n,c)=>`👋 ${n} joined! (${c})`,backGames:'Back to games 👋',
+oHow:'🌐 HOW ONLINE WORKS',o1:'One phone taps Create and shares the code.',o2:'Others tap Join, enter name + code.',o3:'Host taps Start — all play together.',create:'＋ Create',join:'→ Join',namePh:'Step 1: YOUR NAME',codePh:'Step 2: 4-LETTER CODE',connect:'Connect 📲',share:'👇 Friends: join with this code',need2:'⏳ Waiting for friends… (need 2+)',ready:n=>`✅ ${n} players! Tap START when all here.`,startBtn:'🎉 Start!',need1:'⏳ Wait for 1 friend to join!',inLobby:n=>`✅ In! Players: ${n}. Wait for host… 🎉`,started:'🎉 Game started!',roomLive:c=>`✅ Room ${c} is live!`,calling:c=>`📞 Calling room ${c}…`,connected:'✅ Connected!',roomNo:'❌ Room not found — check the code!',needCode:'⚠️ Type the 4-letter code first!',needNet:'📡 Online needs internet. Local games work offline!',ourPick:'⭐ OUR PICK',longTag:'⏳ LONG',mins:'min',playersN:'2–10 players',colR:'RED',colG:'GREEN',colB:'BLUE',colY:'YELLOW',stroopHint:'Tap the INK color!',oddHint:'Tap the ODD one out!',aimStop:'STOP!',aimPts:n=>`+${n} pts`,typeAns:'Type the answer + OK',typeHint:'Type it FAST + Enter!',fold:'FOLD',check:'CHECK',callX:n=>`CALL ${n}`,raise:'RAISE +10',peek:'👁 HOLD TO PEEK',pot:'Pot',chipsW:'Chips',ante:n=>`Ante ${n}`,streetN:['Flop','Turn','River'],handN:['High card','Pair','Two pair','Three of a kind','Straight','Flush','Full house','Four of a kind','Straight flush'],showWin:(w,h)=>`${w} wins with ${h}!`,takesPot:w=>`${w} takes the pot!`,foldedN:n=>`${n} folds`,flip:'FLIP!',warCard:(e,n,c)=>`${e} ${n} → ${c}`,watch:'Watch…',repeatGo:'Your turn — repeat!',simSurv:n=>`${n} survives! +1`,lives:m=>`❌ ${m}/6`,hmWin:n=>`${n} solved it! +3`,hmLose:w=>`It was: ${w}`,hold:'HOLD!',blHint:'Release to bank your air!',popped:'💥 POP! 0 pts',banked:n=>`Banked +${n}!`,tourney:'🏆 Tournament',pickT:'Tap games to add them (2–5):',startT:n=>`▶ Start (${n} games)`,need2g:'Pick at least 2 games!',timeUp:'⏱ Time! No point.',nextG:g=>`Next: ${g} →`,seeRes:'🏆 See final results',tourneyWin:n=>`${n} WINS THE TOURNAMENT!`,tourneySub:'total across all games',quickPlay:'▶ QUICK PLAY',roundsW:'Rounds',fixedNote:'Ends on its own 🏁',hardMode:'🔥 HARD',omBanner:'🌐 Online Multiplayer',omTitle:'Online Multiplayer',omSub:'Pick a game, or be surprised — then share the room code.',omPick:'🎮 Pick a game',omSurprise:'🎲 Surprise',omGo:'Continue →',omCur:g=>`Game: ${g}`,omRnd:'🎲 Surprise (random game)',achT:'Achievement',feverMsg:'⚡ FEVER ROUND — double points!',fall:'All',fquick:'Quick',flong:'Long',fpicks:'⭐ Picks',fskill:'🧠 Skill',surprise:'🎲 Surprise me',joined:(n,c)=>`👋 ${n} joined! (${c})`,backGames:'Back to games 👋',
 yourTurn:(e,n)=>`${e} ${n}: your turn!`,champ:(e,n)=>`🏆 ${e} ${n} is CHAMPION! +3`,locked:'🔒 Locked!',tieAgain:'Tie! Again!',
 rpsPick:'Pick one — together!',roll:'🎲 ROLL!',rolled:(e,n,f)=>`${e} ${n} rolled ${f}`,roundWin:n=>`${n} takes the round! +2`,tieRoll:'Tie at top! Reroll!',
 higher:'▲ HIGHER',lower:'▼ LOWER',hiloTurn:(e,n)=>`${e} ${n}: higher or lower?`,streak:n=>`Streak: ${n}`,bust:'Wrong! Turn over.',
@@ -667,10 +662,10 @@ draw:'🎰 DRAW!',drawn:n=>`Drawn: ${n}`,tapMatch:'Tap YOUR matching numbers!',b
 },
 // ============ STRINGS: HEBREW ============
 he:{
-tag:'👥 2–8 שחקנים · 15 משחקי סקיל',
+tag:'👥 2–10 שחקנים · 15 משחקי סקיל',
 gTitle:'שלב 2 — בחר משחק',gSub:'בחר משחק אחד',back:'→ חזרה',
-mTitle:'שלב 3 — איך משחקים',mLocal:'אותו מכשיר',mLocalS:'חברים חולקים מסך אחד',mOnline:'חדר אונליין',mOnlineS:'כל אחד בטלפון שלו',
-suTitle:'📝 הוספת שחקנים (2–8)',su1:'כתוב את השם של כל חבר.',su2c:'זכור את המקש שלך — תלחץ עליו במשחקים מהירים.',su2p:'לחץ על המקש כדי לבחור מקש משלך. גם מקשים וגם כפתורים!',add:'+ הוסף',start:'🎉 התחל →',
+mTitle:'שלב 3 — איך משחקים',mLocal:'אותו מכשיר',mLocalS:'חברים חולקים מסך אחד',mOnline:'חדר אונליין',mOnlineS:'כל אחד בטלפון שלו',solo:'🤖 לבד נגד בוט',soloS:'אימון נגד המחשב',difT:'רמת הבוט',difE:'קל',difM:'בינוני',difH:'קשה',
+suTitle:'📝 הוספת שחקנים (2–10)',su1:'כתוב את השם של כל חבר.',su2c:'זכור את המקש שלך — תלחץ עליו במשחקים מהירים.',su2p:'לחץ על המקש כדי לבחור מקש משלך. גם מקשים וגם כפתורים!',add:'+ הוסף',start:'🎉 התחל →',
 go:'הבנתי — קדימה! 🚀',how:'📖 איך משחקים',skip:'דלג →',ok:'אישור →',again:'🔁 שחק שוב',other:'🎮 משחקים אחרים',waitHost:'⏳ מחכה למארח…',
 roundOf:(r,n)=>`סיבוב ${r} מתוך ${n}`,qOf:(r,n)=>`שאלה ${r} מתוך ${n}`,
 rWait:'🔴 לחכות…',rWaitC:'ידיים למעלה! רק כשהופך לירוק לוחצים.',rWaitP:'ידיים למעלה! רק כשהופך לירוק לוחצים על הכפתור.',rWaitNet:'מחכים לירוק ואז לוחצים על הקופסה!',rGo:'🟢 קדימה!',rGoC:'המקש הראשון מנצח!',rGoP:'הלחיצה הראשונה מנצחת!',rFoul:n=>`🚫 ${n} הקדים — בחוץ!`,rAllFoul:'💀 כולם טעו! אין נקודות.',rWin:(e,n)=>`🏆 ${e} ${n} מנצח בסיבוב!`,rFast:n=>`${n} היה הכי מהיר!`,rPts:'הנקודות חולקו!',rNoTap:'😴 אף אחד לא לחץ!',rEarly:'🚫 מוקדם מדי — נפסלת.',rLocked:m=>`⚡ ${m}ms — נרשם!`,rWaitOthers:'מחכה לכולם…',
@@ -682,7 +677,7 @@ cHint:'כתוב מדינה שמתחילה באות ולחץ Enter.',cEnNote:'ט�
 kStart:'▶ לחץ כדי להתחיל',kMash:'👆 ללחוץ! ללחוץ! ללחוץ!',kGo:'קדימה! 🔥',kStep1:n=>`שלב 1: ${n}, לחץ כדי להתחיל ⏱`,kTurn:(e,n)=>`${e} ${n}: לחץ 5 שניות!`,kScore:(e,n,c)=>`${e} ${n}: ${c} לחיצות!`,kWin:(e,n,c)=>`🏆 ${e} ${n} מנצח עם ${c} לחיצות!`,kNow:'ללחוץ עכשיו!',kTime:'נגמר! סופרים…',
 gSecret:(n,r,tot)=>`סיבוב ${r}/${tot}: ${n}, נחש בסוד 🙈`,gLook:'אחרים לא מציצים! 1–100 + אישור.',gLock:'🔒 אישור הניחוש',gLocked:(a,b)=>`🔒 נרשם! (${a}/${b})`,gBad:'⚠️ מספר בין 1 ל-100!',gTarget:(t,n,g)=>`🎯 המטרה ${t}! 🏆 ${n} ניחש ${g} — +2`,gTargetH:(t,n)=>`🎯 המטרה ${t}! 🏆 ${n}`,gYour:(r,tot)=>`סיבוב ${r}/${tot} — הניחוש שלך:`,gClose:'הכי קרוב למטרה מנצח.',gReveal:(t,arr)=>`מטרה ${t}: ${arr}`,gWait:(a,b)=>`מחכה לכולם… (${a}/${b})`,
 wins:n=>`${n} מנצח!`,tie:'🤝 תיקו!',resSub:g=>`${g} · תוצאות:`,
-oHow:'🌐 איך אונליין עובד',o1:'טלפון אחד לוחץ "צור" ומשתף קוד.',o2:'השאר לוחצים "הצטרף", שם + קוד.',o3:'המארח לוחץ "התחל" — כולם יחד.',create:'＋ צור',join:'→ הצטרף',namePh:'שלב 1: השם שלך',codePh:'שלב 2: קוד 4 אותיות',connect:'התחבר 📲',share:'👇 חברים: הצטרפו עם הקוד',need2:'⏳ מחכה לחברים… (צריך 2+)',ready:n=>`✅ ${n} שחקנים! התחל כשכולם כאן.`,startBtn:'🎉 התחל!',need1:'⏳ חכה לחבר אחד!',inLobby:n=>`✅ בפנים! שחקנים: ${n}. מחכה למארח… 🎉`,started:'🎉 המשחק התחיל!',roomLive:c=>`✅ חדר ${c} פעיל!`,calling:c=>`📞 מתקשר לחדר ${c}…`,connected:'✅ מחובר!',roomNo:'❌ החדר לא נמצא — בדוק קוד!',needCode:'⚠️ קודם כתוב קוד 4 אותיות!',needNet:'📡 אונליין צריך אינטרנט. משחק מקומי עובד גם בלי!',ourPick:'⭐ הבחירה שלנו',longTag:'⏳ ארוך',mins:'דק׳',playersN:'2–8 שחקנים',colR:'אדום',colG:'ירוק',colB:'כחול',colY:'צהוב',stroopHint:'לחץ על צבע הדיו!',oddHint:'לחץ על השונה!',aimStop:'עצור!',aimPts:n=>`+${n} נק׳`,typeAns:'כתוב תשובה + אישור',typeHint:'הקלד מהר + Enter!',fold:'קפל',check:'עבור',callX:n=>`השווה ${n}`,raise:'העלה +10',peek:'👁 החזק להצצה',pot:'קופה',chipsW:'צ׳יפים',ante:n=>`אנטה ${n}`,streetN:['פלופ','טרן','ריור'],handN:['קלף גבוה','זוג','זוגיים','שלישייה','רצף','פלאש','פול האוס','רביעייה','רצף פלאש'],showWin:(w,h)=>`${w} מנצח עם ${h}!`,takesPot:w=>`${w} לוקח את הקופה!`,foldedN:n=>`${n} קיפל`,flip:'הפוך!',warCard:(e,n,c)=>`${e} ${n} → ${c}`,watch:'רואים…',repeatGo:'תורך — חזור!',simSurv:n=>`${n} שרד! +1`,lives:m=>`❌ ${m}/6`,hmWin:n=>`${n} פתר! +3`,hmLose:w=>`המילה: ${w}`,hold:'החזק!',blHint:'עזוב כדי לשמור!',popped:'💥 בום! 0',banked:n=>`נשמר +${n}!`,tourney:'🏆 טורניר',pickT:'לחץ על משחקים להוספה (2–5):',startT:n=>`▶ התחל (${n} משחקים)`,need2g:'בחר לפחות 2 משחקים!',timeUp:'⏱ נגמר הזמן!',nextG:g=>`הבא: ${g} →`,seeRes:'🏆 תוצאות סופיות',tourneyWin:n=>`${n} אלוף הטורניר!`,tourneySub:'סך הכל בכל המשחקים',hardMode:'🔥 קשה',omBanner:'🌐 מולטיפלייר אונליין',omTitle:'מולטיפלייר אונליין',omSub:'בחר משחק או הופתע — ואז שתף קוד.',omPick:'🎮 בחר משחק',omSurprise:'🎲 הפתעה',omGo:'המשך →',omCur:g=>`משחק: ${g}`,omRnd:'🎲 הפתעה (משחק אקראי)',achT:'הישג',feverMsg:'⚡ סיבוב חם — נקודות כפולות!',fall:'הכל',fquick:'קצרים',flong:'ארוכים',fpicks:'⭐ נבחרים',fskill:'🧠 מיומנות',surprise:'🎲 הפתע אותי',joined:(n,c)=>`👋 ${n} הצטרף! (${c})`,backGames:'חזרה למשחקים 👋',
+oHow:'🌐 איך אונליין עובד',o1:'טלפון אחד לוחץ "צור" ומשתף קוד.',o2:'השאר לוחצים "הצטרף", שם + קוד.',o3:'המארח לוחץ "התחל" — כולם יחד.',create:'＋ צור',join:'→ הצטרף',namePh:'שלב 1: השם שלך',codePh:'שלב 2: קוד 4 אותיות',connect:'התחבר 📲',share:'👇 חברים: הצטרפו עם הקוד',need2:'⏳ מחכה לחברים… (צריך 2+)',ready:n=>`✅ ${n} שחקנים! התחל כשכולם כאן.`,startBtn:'🎉 התחל!',need1:'⏳ חכה לחבר אחד!',inLobby:n=>`✅ בפנים! שחקנים: ${n}. מחכה למארח… 🎉`,started:'🎉 המשחק התחיל!',roomLive:c=>`✅ חדר ${c} פעיל!`,calling:c=>`📞 מתקשר לחדר ${c}…`,connected:'✅ מחובר!',roomNo:'❌ החדר לא נמצא — בדוק קוד!',needCode:'⚠️ קודם כתוב קוד 4 אותיות!',needNet:'📡 אונליין צריך אינטרנט. משחק מקומי עובד גם בלי!',ourPick:'⭐ הבחירה שלנו',longTag:'⏳ ארוך',mins:'דק׳',playersN:'2–10 שחקנים',colR:'אדום',colG:'ירוק',colB:'כחול',colY:'צהוב',stroopHint:'לחץ על צבע הדיו!',oddHint:'לחץ על השונה!',aimStop:'עצור!',aimPts:n=>`+${n} נק׳`,typeAns:'כתוב תשובה + אישור',typeHint:'הקלד מהר + Enter!',fold:'קפל',check:'עבור',callX:n=>`השווה ${n}`,raise:'העלה +10',peek:'👁 החזק להצצה',pot:'קופה',chipsW:'צ׳יפים',ante:n=>`אנטה ${n}`,streetN:['פלופ','טרן','ריור'],handN:['קלף גבוה','זוג','זוגיים','שלישייה','רצף','פלאש','פול האוס','רביעייה','רצף פלאש'],showWin:(w,h)=>`${w} מנצח עם ${h}!`,takesPot:w=>`${w} לוקח את הקופה!`,foldedN:n=>`${n} קיפל`,flip:'הפוך!',warCard:(e,n,c)=>`${e} ${n} → ${c}`,watch:'רואים…',repeatGo:'תורך — חזור!',simSurv:n=>`${n} שרד! +1`,lives:m=>`❌ ${m}/6`,hmWin:n=>`${n} פתר! +3`,hmLose:w=>`המילה: ${w}`,hold:'החזק!',blHint:'עזוב כדי לשמור!',popped:'💥 בום! 0',banked:n=>`נשמר +${n}!`,tourney:'🏆 טורניר',pickT:'לחץ על משחקים להוספה (2–5):',startT:n=>`▶ התחל (${n} משחקים)`,need2g:'בחר לפחות 2 משחקים!',timeUp:'⏱ נגמר הזמן!',nextG:g=>`הבא: ${g} →`,seeRes:'🏆 תוצאות סופיות',tourneyWin:n=>`${n} אלוף הטורניר!`,tourneySub:'סך הכל בכל המשחקים',quickPlay:'▶ משחק מהיר',roundsW:'סיבובים',fixedNote:'נגמר לבד 🏁',hardMode:'🔥 קשה',omBanner:'🌐 מולטיפלייר אונליין',omTitle:'מולטיפלייר אונליין',omSub:'בחר משחק או הופתע — ואז שתף קוד.',omPick:'🎮 בחר משחק',omSurprise:'🎲 הפתעה',omGo:'המשך →',omCur:g=>`משחק: ${g}`,omRnd:'🎲 הפתעה (משחק אקראי)',achT:'הישג',feverMsg:'⚡ סיבוב חם — נקודות כפולות!',fall:'הכל',fquick:'קצרים',flong:'ארוכים',fpicks:'⭐ נבחרים',fskill:'🧠 מיומנות',surprise:'🎲 הפתע אותי',joined:(n,c)=>`👋 ${n} הצטרף! (${c})`,backGames:'חזרה למשחקים 👋',
 yourTurn:(e,n)=>`${e} ${n}: תורך!`,champ:(e,n)=>`🏆 ${e} ${n} אלוף! +3`,locked:'🔒 נרשם!',tieAgain:'תיקו! שוב!',
 rpsPick:'בוחרים ביחד!',roll:'🎲 הטל!',rolled:(e,n,f)=>`${e} ${n} הטיל ${f}`,roundWin:n=>`${n} לוקח את הסיבוב! +2`,tieRoll:'תיקו! מטילים שוב!',
 higher:'▲ גבוה יותר',lower:'▼ נמוך יותר',hiloTurn:(e,n)=>`${e} ${n}: גבוה או נמוך?`,streak:n=>`רצף: ${n}`,bust:'טעות! סוף תור.',
@@ -691,10 +686,10 @@ draw:'🎰 הגרל!',drawn:n=>`הוגרל: ${n}`,tapMatch:'לחץ על המספ
 },
 // ============ STRINGS: SPANISH ============
 es:{
-tag:'👥 2–8 JUGADORES · 15 JUEGOS',
+tag:'👥 2–10 JUGADORES · 15 JUEGOS',
 gTitle:'Paso 2 — Elige un juego',gSub:'Elige un juego',back:'← Atrás',
-mTitle:'Paso 3 — Cómo se juega',mLocal:'Mismo dispositivo',mLocalS:'Amigos comparten esta pantalla',mOnline:'Sala en línea',mOnlineS:'Cada uno en su teléfono',
-suTitle:'📝 AGREGA JUGADORES (2–8)',su1:'Escribe el nombre de cada amigo.',su2c:'Recuerda tu TECLA — la pulsarás en juegos rápidos.',su2p:'Toca la TECLA para elegir la tuya. Valen teclas y botones!',add:'+ Agregar',start:'🎉 Empezar →',
+mTitle:'Paso 3 — Cómo se juega',mLocal:'Mismo dispositivo',mLocalS:'Amigos comparten esta pantalla',mOnline:'Sala en línea',mOnlineS:'Cada uno en su teléfono',solo:'🤖 Solo vs Bot',soloS:'Practica contra la máquina',difT:'Nivel',difE:'Fácil',difM:'Medio',difH:'Difícil',
+suTitle:'📝 AGREGA JUGADORES (2–10)',su1:'Escribe el nombre de cada amigo.',su2c:'Recuerda tu TECLA — la pulsarás en juegos rápidos.',su2p:'Toca la TECLA para elegir la tuya. Valen teclas y botones!',add:'+ Agregar',start:'🎉 Empezar →',
 go:'Entendido — VAMOS! 🚀',how:'📖 CÓMO SE JUEGA',skip:'Saltar →',ok:'OK →',again:'🔁 Jugar otra vez',other:'🎮 Otros juegos',waitHost:'⏳ Esperando al anfitrión…',
 roundOf:(r,n)=>`Ronda ${r} de ${n}`,qOf:(r,n)=>`Pregunta ${r} de ${n}`,
 rWait:'🔴 ESPERA…',rWaitC:'Manos quietas! Pulsa tu tecla SOLO en verde.',rWaitP:'Manos quietas! Toca TU botón SOLO en verde.',rWaitNet:'Espera el VERDE y TOCA la caja!',rGo:'🟢 YA!',rGoC:'La primera TECLA gana!',rGoP:'El primer TOQUE gana!',rFoul:n=>`🚫 ${n} se adelantó — fuera!`,rAllFoul:'💀 Todos fallaron! Sin puntos.',rWin:(e,n)=>`🏆 ${e} ${n} gana la ronda!`,rFast:n=>`${n} fue el más rápido!`,rPts:'Puntos dados!',rNoTap:'😴 Nadie tocó!',rEarly:'🚫 Muy pronto — fuera.',rLocked:m=>`⚡ ${m}ms — registrado!`,rWaitOthers:'Esperando a todos…',
@@ -706,7 +701,7 @@ cHint:'Escribe un país con esa letra y pulsa Enter.',cEnNote:'Consejo: escribe 
 kStart:'▶ TOCA PARA EMPEZAR',kMash:'👆 MAS! MAS! MAS!',kGo:'VAMOS! 🔥',kStep1:n=>`Paso 1: ${n}, toca para empezar ⏱`,kTurn:(e,n)=>`${e} ${n}: pulsa 5 segundos!`,kScore:(e,n,c)=>`${e} ${n}: ${c} toques!`,kWin:(e,n,c)=>`🏆 ${e} ${n} gana con ${c} toques!`,kNow:'Pulsa AHORA!',kTime:'Tiempo! Contando…',
 gSecret:(n,r,tot)=>`Ronda ${r}/${tot}: ${n}, adivina en secreto 🙈`,gLook:'Otros no miren! 1–100 + confirmar.',gLock:'🔒 Confirmar mi número',gLocked:(a,b)=>`🔒 Listo! (${a}/${b})`,gBad:'⚠️ Número del 1 al 100!',gTarget:(t,n,g)=>`🎯 La meta era ${t}! 🏆 ${n} dijo ${g} — +2`,gTargetH:(t,n)=>`🎯 Meta ${t}! 🏆 ${n}`,gYour:(r,tot)=>`Ronda ${r}/${tot} — tu número:`,gClose:'El más cercano gana.',gReveal:(t,arr)=>`Meta ${t}: ${arr}`,gWait:(a,b)=>`Esperando a todos… (${a}/${b})`,
 wins:n=>`¡${n} GANA!`,tie:'🤝 EMPATE!',resSub:g=>`${g} · puntos:`,
-oHow:'🌐 CÓMO JUGAR EN LÍNEA',o1:'Un teléfono toca Crear y comparte el código.',o2:'Los demás tocan Unirse: nombre + código.',o3:'El anfitrión toca Empezar.',create:'＋ Crear',join:'→ Unirse',namePh:'Paso 1: TU NOMBRE',codePh:'Paso 2: CÓDIGO DE 4 LETRAS',connect:'Conectar 📲',share:'👇 Amigos: únanse con este código',need2:'⏳ Esperando amigos… (mínimo 2)',ready:n=>`✅ ${n} jugadores! START cuando estén todos.`,startBtn:'🎉 Empezar!',need1:'⏳ Espera 1 amigo!',inLobby:n=>`✅ Dentro! Jugadores: ${n}. Espera… 🎉`,started:'🎉 Empezó!',roomLive:c=>`✅ Sala ${c} lista!`,calling:c=>`📞 Llamando sala ${c}…`,connected:'✅ Conectado!',roomNo:'❌ Sala no encontrada!',needCode:'⚠️ Escribe el código primero!',needNet:'📡 En línea necesita internet. ¡Local funciona sin conexión!',ourPick:'⭐ ELEGIDO',longTag:'⏳ LARGO',mins:'min',playersN:'2–8 jugadores',colR:'ROJO',colG:'VERDE',colB:'AZUL',colY:'AMARILLO',stroopHint:'¡Toca el color!',oddHint:'¡Toca el diferente!',aimStop:'¡PARA!',aimPts:n=>`+${n} pts`,typeAns:'Escribe + OK',typeHint:'¡Escribe rápido + Enter!',fold:'RETIRAR',check:'PASAR',callX:n=>`IGUALAR ${n}`,raise:'SUBIR +10',peek:'👁 MANTÉN PARA VER',pot:'Bote',chipsW:'Fichas',ante:n=>`Apuesta ${n}`,streetN:['Flop','Turn','River'],handN:['Carta alta','Pareja','Doble pareja','Trío','Escalera','Color','Full','Póker','Escalera de color'],showWin:(w,h)=>`¡${w} gana con ${h}!`,takesPot:w=>`¡${w} se lleva el bote!`,foldedN:n=>`${n} se retira`,flip:'¡YA!',warCard:(e,n,c)=>`${e} ${n} → ${c}`,watch:'Mira…',repeatGo:'¡Tu turno — repite!',simSurv:n=>`¡${n} sigue! +1`,lives:m=>`❌ ${m}/6`,hmWin:n=>`¡${n} lo resolvió! +3`,hmLose:w=>`Era: ${w}`,hold:'¡MANTÉN!',blHint:'¡Suelta para guardar!',popped:'💥 ¡PUM! 0',banked:n=>`¡Guardado +${n}!`,tourney:'🏆 Torneo',pickT:'Toca juegos (2–5):',startT:n=>`▶ Empezar (${n})`,need2g:'¡Elige 2+!',timeUp:'⏱ ¡Tiempo!',nextG:g=>`Siguiente: ${g} →`,seeRes:'🏆 Resultados',tourneyWin:n=>`¡${n} CAMPEÓN DEL TORNEO!`,tourneySub:'total de todos',hardMode:'🔥 DURO',omBanner:'🌐 Multijugador en línea',omTitle:'Multijugador en línea',omSub:'Elige o sorpréndete — luego comparte el código.',omPick:'🎮 Elige',omSurprise:'🎲 Sorpresa',omGo:'Continuar →',omCur:g=>`Juego: ${g}`,omRnd:'🎲 Sorpresa (al azar)',achT:'Logro',feverMsg:'⚡ ¡RONDA DOBLE — puntos dobles!',fall:'Todos',fquick:'Rápidos',flong:'Largos',fpicks:'⭐ Top',fskill:'🧠 Habilidad',surprise:'🎲 Sorpréndeme',joined:(n,c)=>`👋 ${n} se unió! (${c})`,backGames:'A los juegos 👋',
+oHow:'🌐 CÓMO JUGAR EN LÍNEA',o1:'Un teléfono toca Crear y comparte el código.',o2:'Los demás tocan Unirse: nombre + código.',o3:'El anfitrión toca Empezar.',create:'＋ Crear',join:'→ Unirse',namePh:'Paso 1: TU NOMBRE',codePh:'Paso 2: CÓDIGO DE 4 LETRAS',connect:'Conectar 📲',share:'👇 Amigos: únanse con este código',need2:'⏳ Esperando amigos… (mínimo 2)',ready:n=>`✅ ${n} jugadores! START cuando estén todos.`,startBtn:'🎉 Empezar!',need1:'⏳ Espera 1 amigo!',inLobby:n=>`✅ Dentro! Jugadores: ${n}. Espera… 🎉`,started:'🎉 Empezó!',roomLive:c=>`✅ Sala ${c} lista!`,calling:c=>`📞 Llamando sala ${c}…`,connected:'✅ Conectado!',roomNo:'❌ Sala no encontrada!',needCode:'⚠️ Escribe el código primero!',needNet:'📡 En línea necesita internet. ¡Local funciona sin conexión!',ourPick:'⭐ ELEGIDO',longTag:'⏳ LARGO',mins:'min',playersN:'2–10 jugadores',colR:'ROJO',colG:'VERDE',colB:'AZUL',colY:'AMARILLO',stroopHint:'¡Toca el color!',oddHint:'¡Toca el diferente!',aimStop:'¡PARA!',aimPts:n=>`+${n} pts`,typeAns:'Escribe + OK',typeHint:'¡Escribe rápido + Enter!',fold:'RETIRAR',check:'PASAR',callX:n=>`IGUALAR ${n}`,raise:'SUBIR +10',peek:'👁 MANTÉN PARA VER',pot:'Bote',chipsW:'Fichas',ante:n=>`Apuesta ${n}`,streetN:['Flop','Turn','River'],handN:['Carta alta','Pareja','Doble pareja','Trío','Escalera','Color','Full','Póker','Escalera de color'],showWin:(w,h)=>`¡${w} gana con ${h}!`,takesPot:w=>`¡${w} se lleva el bote!`,foldedN:n=>`${n} se retira`,flip:'¡YA!',warCard:(e,n,c)=>`${e} ${n} → ${c}`,watch:'Mira…',repeatGo:'¡Tu turno — repite!',simSurv:n=>`¡${n} sigue! +1`,lives:m=>`❌ ${m}/6`,hmWin:n=>`¡${n} lo resolvió! +3`,hmLose:w=>`Era: ${w}`,hold:'¡MANTÉN!',blHint:'¡Suelta para guardar!',popped:'💥 ¡PUM! 0',banked:n=>`¡Guardado +${n}!`,tourney:'🏆 Torneo',pickT:'Toca juegos (2–5):',startT:n=>`▶ Empezar (${n})`,need2g:'¡Elige 2+!',timeUp:'⏱ ¡Tiempo!',nextG:g=>`Siguiente: ${g} →`,seeRes:'🏆 Resultados',tourneyWin:n=>`¡${n} CAMPEÓN DEL TORNEO!`,tourneySub:'total de todos',quickPlay:'▶ JUEGO RÁPIDO',roundsW:'Rondas',fixedNote:'Termina solo 🏁',hardMode:'🔥 DURO',omBanner:'🌐 Multijugador en línea',omTitle:'Multijugador en línea',omSub:'Elige o sorpréndete — luego comparte el código.',omPick:'🎮 Elige',omSurprise:'🎲 Sorpresa',omGo:'Continuar →',omCur:g=>`Juego: ${g}`,omRnd:'🎲 Sorpresa (al azar)',achT:'Logro',feverMsg:'⚡ ¡RONDA DOBLE — puntos dobles!',fall:'Todos',fquick:'Rápidos',flong:'Largos',fpicks:'⭐ Top',fskill:'🧠 Habilidad',surprise:'🎲 Sorpréndeme',joined:(n,c)=>`👋 ${n} se unió! (${c})`,backGames:'A los juegos 👋',
 yourTurn:(e,n)=>`${e} ${n}: ¡tu turno!`,champ:(e,n)=>`¡🏆 ${e} ${n} CAMPEÓN! +3`,locked:'🔒 ¡Listo!',tieAgain:'¡Empate! ¡Otra vez!',
 rpsPick:'¡Elijan juntos!',roll:'🎲 ¡TIRA!',rolled:(e,n,f)=>`${e} ${n} sacó ${f}`,roundWin:n=>`¡${n} gana la ronda! +2`,tieRoll:'¡Empate! ¡Otra vez!',
 higher:'▲ MAYOR',lower:'▼ MENOR',hiloTurn:(e,n)=>`${e} ${n}: ¿mayor o menor?`,streak:n=>`Racha: ${n}`,bust:'¡Mal! Fin del turno.',
@@ -715,10 +710,10 @@ draw:'🎰 ¡SACA!',drawn:n=>`Salió: ${n}`,tapMatch:'¡Toca tus números!',bing
 },
 // ============ STRINGS: ARABIC ============
 ar:{
-tag:'👥 2–8 لاعبين · 15 لعبة',
+tag:'👥 2–10 لاعبين · 15 لعبة',
 gTitle:'الخطوة 2 — اختر لعبة',gSub:'اختر لعبة واحدة',back:'→ رجوع',
-mTitle:'الخطوة 3 — كيف نلعب',mLocal:'نفس الجهاز',mLocalS:'الأصدقاء يشاركون هذه الشاشة',mOnline:'غرفة أونلاين',mOnlineS:'كل واحد على هاتفه',
-suTitle:'📝 أضف اللاعبين (2–8)',su1:'اكتب اسم كل صديق.',su2c:'تذكر الزر الخاص بك — ستضغطه في الألعاب السريعة.',su2p:'المس الزر لاختيار زرّك. الأزرار تعمل!',add:'+ أضف',start:'🎉 ابدأ →',
+mTitle:'الخطوة 3 — كيف نلعب',mLocal:'نفس الجهاز',mLocalS:'الأصدقاء يشاركون هذه الشاشة',mOnline:'غرفة أونلاين',mOnlineS:'كل واحد على هاتفه',solo:'🤖 فردي ضد بوت',soloS:'تدرب ضد الكمبيوتر',difT:'المستوى',difE:'سهل',difM:'متوسط',difH:'صعب',
+suTitle:'📝 أضف اللاعبين (2–10)',su1:'اكتب اسم كل صديق.',su2c:'تذكر الزر الخاص بك — ستضغطه في الألعاب السريعة.',su2p:'المس الزر لاختيار زرّك. الأزرار تعمل!',add:'+ أضف',start:'🎉 ابدأ →',
 go:'فهمت — هيا! 🚀',how:'📖 كيف تلعب',skip:'تخط →',ok:'موافق →',again:'🔁 العب مجددا',other:'🎮 ألعاب أخرى',waitHost:'⏳ بانتظار المضيف…',
 roundOf:(r,n)=>`الجولة ${r} من ${n}`,qOf:(r,n)=>`السؤال ${r} من ${n}`,
 rWait:'🔴 انتظر…',rWaitC:'يديك بعيد! اضغط زرّك فقط في الأخضر.',rWaitP:'يديك بعيد! المس زرّك فقط في الأخضر.',rWaitNet:'انتظر الأخضر ثم المس المربع!',rGo:'🟢 الآن!',rGoC:'أول زر يفوز!',rGoP:'أول لمسة تفوز!',rFoul:n=>`🚫 ${n} استعجل — خارج!`,rAllFoul:'💀 الجميع أخطأ! لا نقاط.',rWin:(e,n)=>`🏆 ${e} ${n} يفوز بالجولة!`,rFast:n=>`${n} كان الأسرع!`,rPts:'تم توزيع النقاط!',rNoTap:'😴 لا أحد لمس!',rEarly:'🚫 مبكر جدا — خرجت.',rLocked:m=>`⚡ ${m}ms — تم!`,rWaitOthers:'بانتظار الجميع…',
@@ -730,7 +725,7 @@ cHint:'اكتب دولة تبدأ بهذا الحرف ثم Enter.',cEnNote:'نص
 kStart:'▶ المس للبدء',kMash:'👆 اضغط! اضغط! اضغط!',kGo:'هيا! 🔥',kStep1:n=>`الخطوة 1: ${n}، المس للبدء ⏱`,kTurn:(e,n)=>`${e} ${n}: اضغط 5 ثوان!`,kScore:(e,n,c)=>`${e} ${n}: ${c} ضغطة!`,kWin:(e,n,c)=>`🏆 ${e} ${n} يفوز مع ${c} ضغطة!`,kNow:'اضغط الآن!',kTime:'انتهى! نعد…',
 gSecret:(n,r,tot)=>`الجولة ${r}/${tot}: ${n}، خمن بسرية 🙈`,gLook:'الآخرون لا ينظرون! 1–100 + تأكيد.',gLock:'🔒 تأكيد تخميني',gLocked:(a,b)=>`🔒 تم! (${a}/${b})`,gBad:'⚠️ رقم من 1 إلى 100!',gTarget:(t,n,g)=>`🎯 الهدف كان ${t}! 🏆 ${n} خمن ${g} — +2`,gTargetH:(t,n)=>`🎯 الهدف ${t}! 🏆 ${n}`,gYour:(r,tot)=>`الجولة ${r}/${tot} — تخمينك:`,gClose:'الأقرب للهدف يفوز.',gReveal:(t,arr)=>`الهدف ${t}: ${arr}`,gWait:(a,b)=>`بانتظار الجميع… (${a}/${b})`,
 wins:n=>`${n} يفوز!`,tie:'🤝 تعادل!',resSub:g=>`${g} · النتائج:`,
-oHow:'🌐 كيف تلعب أونلاين',o1:'هاتف واحد يضغط إنشاء ويشارك الرمز.',o2:'البقية يضغطون انضمام: الاسم + الرمز.',o3:'المضيف يضغط ابدأ.',create:'＋ إنشاء',join:'→ انضمام',namePh:'الخطوة 1: اسمك',codePh:'الخطوة 2: رمز من 4 حروف',connect:'اتصل 📲',share:'👇 انضموا بهذا الرمز',need2:'⏳ بانتظار الأصدقاء… (2+)',ready:n=>`✅ ${n} لاعبين! ابدأ عندما يكتملوا.`,startBtn:'🎉 ابدأ!',need1:'⏳ انتظر صديقا!',inLobby:n=>`✅ دخلت! اللاعبون: ${n}. انتظر… 🎉`,started:'🎉 بدأت!',roomLive:c=>`✅ الغرفة ${c} جاهزة!`,calling:c=>`📞 نتصل بالغرفة ${c}…`,connected:'✅ متصل!',roomNo:'❌ الغرفة غير موجودة!',needCode:'⚠️ اكتب الرمز أولا!',needNet:'📡 الأونلاين يحتاج إنترنت. المحلي يعمل دون اتصال!',ourPick:'⭐ اختيارنا',longTag:'⏳ طويل',mins:'د',playersN:'2–8 لاعبين',colR:'أحمر',colG:'أخضر',colB:'أزرق',colY:'أصفر',stroopHint:'المس لون الحبر!',oddHint:'المس المختلف!',aimStop:'قف!',aimPts:n=>`+${n} نقاط`,typeAns:'اكتب + موافق',typeHint:'اكتب بسرعة + Enter!',fold:'انسحب',check:'مرر',callX:n=>`طابق ${n}`,raise:'ارفع +10',peek:'👁 امسك للرؤية',pot:'المجموع',chipsW:'رقائق',ante:n=>`رهان ${n}`,streetN:['فلوب','ترن','ريفر'],handN:['أعلى ورقة','زوج','زوجان','ثلاثية','تسلسل','فلاش','فول هاوس','رباعية','تسلسل فلاش'],showWin:(w,h)=>`${w} يفوز مع ${h}!`,takesPot:w=>`${w} يأخذ المجموع!`,foldedN:n=>`${n} انسحب`,flip:'اقلب!',warCard:(e,n,c)=>`${e} ${n} → ${c}`,watch:'شاهد…',repeatGo:'دورك — كرر!',simSurv:n=>`${n} نجا! +1`,lives:m=>`❌ ${m}/6`,hmWin:n=>`${n} حلها! +3`,hmLose:w=>`كانت: ${w}`,hold:'امسك!',blHint:'أفلت للحفظ!',popped:'💥 انفجر! 0',banked:n=>`حُفظ +${n}!`,tourney:'🏆 بطولة',pickT:'المس الألعاب (2–5):',startT:n=>`▶ ابدأ (${n})`,need2g:'اختر لعبتين!',timeUp:'⏱ انتهى الوقت!',nextG:g=>`التالي: ${g} →`,seeRes:'🏆 النتائج',tourneyWin:n=>`${n} بطل البطولة!`,tourneySub:'المجموع الكلي',hardMode:'🔥 صعب',omBanner:'🌐 لعب جماعي أونلاين',omTitle:'لعب جماعي',omSub:'اختر لعبة أو تفاجأ — ثم شارك الرمز.',omPick:'🎮 اختر لعبة',omSurprise:'🎲 مفاجأة',omGo:'تابع →',omCur:g=>`اللعبة: ${g}`,omRnd:'🎲 مفاجأة (عشوائية)',achT:'إنجاز',feverMsg:'⚡ جولة مضاعفة — نقاط مضاعفة!',fall:'الكل',fquick:'سريعة',flong:'طويلة',fpicks:'⭐ مختارة',fskill:'🧠 مهارة',surprise:'🎲 فاجئني',joined:(n,c)=>`👋 ${n} انضم! (${c})`,backGames:'عودة للألعاب 👋',
+oHow:'🌐 كيف تلعب أونلاين',o1:'هاتف واحد يضغط إنشاء ويشارك الرمز.',o2:'البقية يضغطون انضمام: الاسم + الرمز.',o3:'المضيف يضغط ابدأ.',create:'＋ إنشاء',join:'→ انضمام',namePh:'الخطوة 1: اسمك',codePh:'الخطوة 2: رمز من 4 حروف',connect:'اتصل 📲',share:'👇 انضموا بهذا الرمز',need2:'⏳ بانتظار الأصدقاء… (2+)',ready:n=>`✅ ${n} لاعبين! ابدأ عندما يكتملوا.`,startBtn:'🎉 ابدأ!',need1:'⏳ انتظر صديقا!',inLobby:n=>`✅ دخلت! اللاعبون: ${n}. انتظر… 🎉`,started:'🎉 بدأت!',roomLive:c=>`✅ الغرفة ${c} جاهزة!`,calling:c=>`📞 نتصل بالغرفة ${c}…`,connected:'✅ متصل!',roomNo:'❌ الغرفة غير موجودة!',needCode:'⚠️ اكتب الرمز أولا!',needNet:'📡 الأونلاين يحتاج إنترنت. المحلي يعمل دون اتصال!',ourPick:'⭐ اختيارنا',longTag:'⏳ طويل',mins:'د',playersN:'2–10 لاعبين',colR:'أحمر',colG:'أخضر',colB:'أزرق',colY:'أصفر',stroopHint:'المس لون الحبر!',oddHint:'المس المختلف!',aimStop:'قف!',aimPts:n=>`+${n} نقاط`,typeAns:'اكتب + موافق',typeHint:'اكتب بسرعة + Enter!',fold:'انسحب',check:'مرر',callX:n=>`طابق ${n}`,raise:'ارفع +10',peek:'👁 امسك للرؤية',pot:'المجموع',chipsW:'رقائق',ante:n=>`رهان ${n}`,streetN:['فلوب','ترن','ريفر'],handN:['أعلى ورقة','زوج','زوجان','ثلاثية','تسلسل','فلاش','فول هاوس','رباعية','تسلسل فلاش'],showWin:(w,h)=>`${w} يفوز مع ${h}!`,takesPot:w=>`${w} يأخذ المجموع!`,foldedN:n=>`${n} انسحب`,flip:'اقلب!',warCard:(e,n,c)=>`${e} ${n} → ${c}`,watch:'شاهد…',repeatGo:'دورك — كرر!',simSurv:n=>`${n} نجا! +1`,lives:m=>`❌ ${m}/6`,hmWin:n=>`${n} حلها! +3`,hmLose:w=>`كانت: ${w}`,hold:'امسك!',blHint:'أفلت للحفظ!',popped:'💥 انفجر! 0',banked:n=>`حُفظ +${n}!`,tourney:'🏆 بطولة',pickT:'المس الألعاب (2–5):',startT:n=>`▶ ابدأ (${n})`,need2g:'اختر لعبتين!',timeUp:'⏱ انتهى الوقت!',nextG:g=>`التالي: ${g} →`,seeRes:'🏆 النتائج',tourneyWin:n=>`${n} بطل البطولة!`,tourneySub:'المجموع الكلي',quickPlay:'▶ لعب سريع',roundsW:'جولات',fixedNote:'ينتهي وحده 🏁',hardMode:'🔥 صعب',omBanner:'🌐 لعب جماعي أونلاين',omTitle:'لعب جماعي',omSub:'اختر لعبة أو تفاجأ — ثم شارك الرمز.',omPick:'🎮 اختر لعبة',omSurprise:'🎲 مفاجأة',omGo:'تابع →',omCur:g=>`اللعبة: ${g}`,omRnd:'🎲 مفاجأة (عشوائية)',achT:'إنجاز',feverMsg:'⚡ جولة مضاعفة — نقاط مضاعفة!',fall:'الكل',fquick:'سريعة',flong:'طويلة',fpicks:'⭐ مختارة',fskill:'🧠 مهارة',surprise:'🎲 فاجئني',joined:(n,c)=>`👋 ${n} انضم! (${c})`,backGames:'عودة للألعاب 👋',
 yourTurn:(e,n)=>`${e} ${n}: دورك!`,champ:(e,n)=>`🏆 ${e} ${n} بطل! +3`,locked:'🔒 تم!',tieAgain:'تعادل! مجددا!',
 rpsPick:'اختاروا معا!',roll:'🎲 ارم!',rolled:(e,n,f)=>`${e} ${n} رمى ${f}`,roundWin:n=>`${n} يفوز بالجولة! +2`,tieRoll:'تعادل! مجددا!',
 higher:'▲ أعلى',lower:'▼ أقل',hiloTurn:(e,n)=>`${e} ${n}: أعلى أم أقل؟`,streak:n=>`سلسلة: ${n}`,bust:'خطأ! انتهى الدور.',
@@ -1154,6 +1149,8 @@ function applyLang(){
   $('gTitle').textContent=t('gTitle');$('gSub').textContent=t('gSub');$('gBack').textContent=t('back');
   $('mTitle').textContent=t('mTitle');$('mLocal').textContent=t('mLocal');$('mLocalS').textContent=t('mLocalS');
   $('mOnline').textContent=t('mOnline');$('mOnlineS').textContent=t('mOnlineS');$('mBack').textContent=t('back');
+  $('mSolo').textContent=t('solo');$('mSoloS').textContent=t('soloS');
+  $('difT').textContent=t('difT');$('dif0').textContent=t('difE');$('dif1').textContent=t('difM');$('dif2').textContent=t('difH');
   $('suTitle').textContent=t('suTitle');$('su1').textContent=t('su1');$('suStart').textContent=t('start');$('suBack').textContent=t('back');$('suAdd').textContent=t('add');
   $('iHow').textContent=t('how');$('iGo').textContent=t('go');$('cGo').textContent=t('ok');
   document.querySelectorAll('.skipbtn').forEach(b=>b.textContent=t('skip'));
@@ -1163,6 +1160,7 @@ function applyLang(){
   $('myName').placeholder=t('namePh');$('joinCode').placeholder=t('codePh');$('joinBtn').textContent=t('connect');
   $('oShare').textContent=t('share');$('oBack').textContent=t('back');
   $('hostStartBtn').textContent=t('startBtn');
+  $('quickBtn').textContent=t('quickPlay');
   $('onlineBtn').textContent=t('omBanner');
   $('sndBtn').textContent=SOUND?'🔊':'🔇';
   $('mLocalIc').innerHTML=ICON_USERS;$('mOnlineIc').innerHTML=ICON_WIFI;$('resIcon').innerHTML=ICON_TROPHY;
@@ -1172,7 +1170,23 @@ function gameCardHTML(g,selIdx,idx,fn){
   const badges=(m.pick?`<span class="badge pick">${t('ourPick')}</span>`:'')+((m.dur||3)>=4?`<span class="badge long">${t('longTag')}</span>`:'')+(SKILLGAMES.has(g.id)?`<span class="badge skill">🧠 ${t('fskill').replace('🧠 ','')}</span>`:'')+((selIdx!==null&&selIdx>-1)?`<span class="badge pick">${selIdx+1} ✓</span>`:'');
   return `<button class="menu-card gamecard" style="animation-delay:${(idx||0)*35}ms" onclick="${fn?`${fn}('${g.id}')`:(selIdx===null?`pickGame('${g.id}')`:`tqToggle('${g.id}')`)}"><div class="ic" style="background:${g.grad}">${GICON[g.id]||''}</div><div><h3>${nm}</h3><p>${g.tag[lang]||g.tag.en}</p><div class="meta">⏱ ~${m.dur} ${t('mins')} · 👥 ${t('playersN')} · 🏅 ${g.score[lang]||g.score.en} · <span class="dif">${'●'.repeat(d)}<span class="off">${'○'.repeat(3-d)}</span></span></div><div class="badges">${badges}</div></div><div style="margin-inline-start:auto">→</div></button>`;
 }
-function toggleSound(){SOUND=!SOUND;try{localStorage.setItem('pp_sound',JSON.stringify(SOUND))}catch(e){}$('sndBtn').textContent=SOUND?'🔊':'🔇';beep(700)}
+function toggleSound(){SOUND=!SOUND;try{localStorage.setItem('pp_sound',JSON.stringify(SOUND))}catch(e){}$('sndBtn').textContent=SOUND?'🔊':'🔇';if(SOUND&&!MUS.timer)MUS.timer=setInterval(musicTick,300);beep(700)}
+let MUS={ctx:null,step:0,timer:null};
+function musicTick(){
+  if(!SOUND)return;
+  try{
+    if(!MUS.ctx)MUS.ctx=new(window.AudioContext||window.webkitAudioContext)();
+    const a=MUS.ctx,t=a.currentTime,s=MUS.step%8;
+    const notes=[110,110,130.8,110,98,98,110,146.8];
+    const o=a.createOscillator(),g=a.createGain();
+    o.type='triangle';o.frequency.value=notes[s];
+    g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.06,t+0.02);g.gain.exponentialRampToValueAtTime(0.0001,t+0.26);
+    o.connect(g);g.connect(a.destination);o.start(t);o.stop(t+0.3);
+    if(s%2===0){const h=a.createOscillator(),hg=a.createGain();h.type='square';h.frequency.value=6000;hg.gain.setValueAtTime(0.012,t);hg.gain.exponentialRampToValueAtTime(0.0001,t+0.05);h.connect(hg);hg.connect(a.destination);h.start(t);h.stop(t+0.06)}
+  }catch(e){}
+  MUS.step++;
+}
+document.addEventListener('pointerdown',function musBoot(){document.removeEventListener('pointerdown',musBoot);if(!MUS.timer&&SOUND)MUS.timer=setInterval(musicTick,300)});
 let gameFilter='all',HARD=false;try{HARD=JSON.parse(localStorage.getItem('pp_hard')??'false')}catch(e){HARD=false}
 function toggleHard(){HARD=!HARD;try{localStorage.setItem('pp_hard',JSON.stringify(HARD))}catch(e){}beep(HARD?900:400);renderGameCards()}
 const SKILLGAMES=new Set(['reaction','trivia','country','clicker','math','type','seq','scramble','simon','memory','hangman','poker','stroop','oddone']);
@@ -1201,23 +1215,50 @@ function surpriseGame(){
   if(!pool.length)return;
   pickGame(pool[Math.floor(Math.random()*pool.length)].id);
 }
-let TQ=null,tqSel=[],selecting=false,omPick=null;
-function showOnlineMenu(){NET.mode='net';stopAll();show('s-omenu');renderOMenu()}
-function renderOMenu(){
-  $('omTitle').textContent=t('omTitle');$('omSub').textContent=t('omSub');
-  $('omPickBtn').textContent=t('omPick');$('omSurBtn').textContent=t('omSurprise');
-  $('omGo').textContent=t('omGo');$('omBack').textContent=t('back');
-  $('omCur').textContent=omPick?t('omCur')(gname(omPick)):t('omRnd');
-  $('omList').innerHTML='';
+function quickPlay(){
+  NET.mode='local';stopAll();TQ=null;tqSel=[];
+  const saved=recall('names')||[];
+  players=[0,1].map(i=>{const v=((saved[i]||('PLAYER '+(i+1))).replace(/[<>&"]/g,'')).toUpperCase().slice(0,12);return{name:v,score:0,key:KEYS[i],color:COLORS[i],emoji:(v.trim()[0]||'?')}});
+  const g=GAMES[Math.floor(Math.random()*GAMES.length)].id;
+  $('modeTag').textContent=`⚡ ${players.length}P · ${gname(g)}`;
+  showIntro(g);
 }
-function renderOnlinePick(){
-  $('omList').innerHTML=`<div class="gamegrid">`+GAMES.map((g,i)=>gameCardHTML(g,null,i,'pickOnlineGame')).join('')+`</div>`;
-  $('omList').scrollIntoView({block:'nearest'});
+let TQ=null,tqSel=[],selecting=false,omParty=false,omGames=[];
+const FIXEDGAMES=new Set(['trivia','rps','simon','memory','bingo','hilo','hangman','type']);
+const ROUNDS={};
+const DEFR={reaction:3,country:2,clicker:1,guess:3,dice:3,war:5,math:3,seq:3,scramble:3,stroop:3,oddone:3,aim:2,balloon:3,poker:3};
+function RD(id){return ROUNDS[id]||DEFR[id]||3}
+function rqDown(){const id=selectedGame;ROUNDS[id]=Math.max(1,(ROUNDS[id]||DEFR[id]||3)-1);beep(400);renderRq()}
+function rqUp(){const id=selectedGame;ROUNDS[id]=Math.min(8,(ROUNDS[id]||DEFR[id]||3)+1);beep(600);renderRq()}
+function renderRq(){
+  const box=$('rqBox');if(!box)return;
+  if(isNet()&&!NET.isHost){box.innerHTML='';return}
+  if(FIXEDGAMES.has(selectedGame)){box.innerHTML=`<div class="small">${t('fixedNote')}</div>`;return}
+  box.innerHTML=`<div class="howto" style="display:flex;align-items:center;justify-content:center;gap:14px"><b>${t('roundsW')}</b><button class="signbtn" style="font-size:1.4rem;padding:6px 14px" onclick="rqDown()">−</button><span class="count" style="font-size:2rem;min-width:44px" id="rqNum">${RD(selectedGame)}</span><button class="signbtn" style="font-size:1.4rem;padding:6px 14px" onclick="rqUp()">+</button></div>`;
 }
-function pickOnlineGame(id){omPick=id;NET.game=id;selectedGame=id;beep(600);renderOMenu()}
-function surpriseOnline(){const pool=GAMES;omPick=pool[Math.floor(Math.random()*pool.length)].id;NET.game=omPick;selectedGame=omPick;beep(700);renderOMenu()}
-function continueOnline(){if(!omPick)surpriseOnline();NET.game=omPick;selectedGame=omPick;showOnline()}
-function routeMenu(){if(NET.mode==='net')showOnlineMenu();else showGames()}
+function renderOnlineGrid(){
+  const el=$('omMiniGrid');if(!el)return;
+  const pb=$('omPartyBtn');if(pb){pb.textContent=`${t('tourney')} ${omParty?`(${omGames.length})`:''}`;pb.style.borderColor=omParty?'var(--pink)':''}
+  el.innerHTML=`<div class="touchgrid">`+GAMES.map(g=>{
+    const pi=omParty?omGames.indexOf(g.id):-1;
+    const sel=omParty?pi>-1:NET.game===g.id;
+    const fn=omParty?`pickPartyGame('${g.id}')`:`pickOnlineGame('${g.id}')`;
+    return `<button class="touchbtn" style="border-color:${sel?'var(--yellow)':'var(--line)'}" onclick="${fn}"><span class="em">${g.icon}</span><div style="font-size:.68rem">${pi>-1?`#${pi+1} `:''}${g.name[lang]||g.name.en}</div></button>`;
+  }).join('')+`</div>`;
+}
+function pickPartyGame(id){
+  const i=omGames.indexOf(id);
+  if(i>-1)omGames.splice(i,1);
+  else{if(omGames.length>=GAMES.length){beep(200);return}omGames.push(id)}
+  beep(500);renderOnlineGrid();
+}
+function togglePartyMode(){omParty=!omParty;omGames=[];beep(500);renderOnlineGrid()}
+function pickOnlineGame(id){NET.game=id;selectedGame=id;beep(600);renderOnlineGrid();const o=$('oGame');if(o)o.textContent=t('omCur')(gname(id))}
+function surpriseOnline(){const pool=GAMES;pickOnlineGame(pool[Math.floor(Math.random()*pool.length)].id);beep(700)}
+function renderOnlineGrid(){
+  const el=$('omMiniGrid');if(!el)return;
+  el.innerHTML=`<div class="touchgrid">`+GAMES.map(g=>`<button class="touchbtn" style="border-color:${NET.game===g.id?'var(--yellow)':'var(--line)'}" onclick="pickOnlineGame('${g.id}')"><span class="em">${g.icon}</span><div style="font-size:.68rem">${g.name[lang]||g.name.en}</div></button>`).join('')+`</div>`;
+}
 function toggleTourney(){if(selecting){selecting=false;showGames()}else{selecting=true;tqSel=[];renderGamesSelect()}}
 function renderGamesSelect(){
   $('tqBtn').textContent='✖';
@@ -1230,13 +1271,13 @@ function renderGamesSelect(){
 function tqToggle(id){
   const i=tqSel.indexOf(id);
   if(i>-1)tqSel.splice(i,1);
-  else{if(tqSel.length>=5){beep(200);return}tqSel.push(id)}
+  else{if(tqSel.length>=GAMES.length){beep(200);return}tqSel.push(id)}
   beep(500);renderGamesSelect();
 }
 function tqStartSelect(){
   if(tqSel.length<2){beep(200);return}
   TQ={list:[...tqSel],idx:0,totals:null};tqSel=[];
-  NET.mode='local';nameCount=2;customKeys=[...KEYS];pendingKey=-1;customSkins=[...Array(8)].map((_,i)=>({c:i,s:null}));
+  NET.mode='local';nameCount=2;customKeys=[...KEYS];pendingKey=-1;customSkins=[...Array(12)].map((_,i)=>({c:i,s:null}));
   renderNames();$('suStart').onclick=tqSetupGo;show('s-setup');
 }
 function tqSetupGo(){
@@ -1246,10 +1287,12 @@ function tqSetupGo(){
   $('modeTag').textContent=`🏆 ${players.length}P · ${TQ.list.length} games`;
   showIntro(TQ.list[0]);
 }
-function mergeTourney(){if(TQ&&TQ.totals)players.forEach((p,i)=>{TQ.totals[i]=(TQ.totals[i]||0)+p.score})}
+function mergeTourney(){if(TQ&&TQ.totals){while(TQ.totals.length<players.length)TQ.totals.push(0);players.forEach((p,i)=>{TQ.totals[i]=(TQ.totals[i]||0)+p.score})}}
 function tqNext(){
   if(!TQ)return;
-  if(TQ.idx<TQ.list.length-1){TQ.idx++;players.forEach(p=>p.score=0);showIntro(TQ.list[TQ.idx])}
+  if(TQ.idx<TQ.list.length-1){TQ.idx++;players.forEach(p=>p.score=0);
+    if(isNet()&&NET.isHost){selectedGame=TQ.list[TQ.idx];broadcast({t:'game-go',game:TQ.list[TQ.idx],names:players.map(p=>p.name),scores:players.map(p=>p.score),mult:MULT,party:{games:TQ.list,idx:TQ.idx},ptot:TQ.totals});$('modeTag').textContent=`🏆 Party ${TQ.idx+1}/${TQ.list.length}`;}
+    showIntro(TQ.list[TQ.idx])}
   else showTourneyPodium();
 }
 function showTourneyPodium(){
@@ -1259,16 +1302,61 @@ function showTourneyPodium(){
   $('resSub').textContent=`🏆 ${t('tourneySub')}`;
   $('resList').innerHTML=order.map((o,i)=>`<div class="stand"><span>${i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1)+'.'}</span><span class="avatar" style="background:${o.p.color}">${o.p.emoji}</span><span>${o.p.name}</span><span class="pts">${o.tot}</span></div>`).join('');
   $('resAgain').style.display='none';$('resNext').style.display='none';$('resOther').style.display='block';
+  if(isNet()&&NET.isHost)broadcast({t:'party-end',winners:order.map(o=>o.p.name)});
   TQ=null;fanfare();
 }
-function pickGame(id){selectedGame=id;NET.game=id;show('s-mode');$('mGame').textContent=`${ginfo(id).icon} ${gname(id)}`}
+function pickGame(id){selectedGame=id;NET.game=id;show('s-mode');$('mGame').textContent=`${ginfo(id).icon} ${gname(id)}`;const sb=$('soloBtn');if(sb)sb.style.display=BOTGAMES.has(id)?'block':'none'}
 function pickMode(m){
-  if(m==='local'){NET.mode='local';nameCount=2;customKeys=[...KEYS];pendingKey=-1;customSkins=[...Array(8)].map((_,i)=>({c:i,s:null}));renderNames();$('suStart').onclick=startLocalGame;show('s-setup')}
+  if(m==='local'){NET.mode='local';BOT.active=false;nameCount=2;customKeys=[...KEYS];pendingKey=-1;customSkins=[...Array(12)].map((_,i)=>({c:i,s:null}));renderNames();$('addRow').style.display='flex';$('difRow').style.display='none';$('suStart').onclick=startLocalGame;show('s-setup')}
+  else if(m==='solo'){NET.mode='local';BOT.active=false;nameCount=1;BOT.dif=1;customKeys=[...KEYS];pendingKey=-1;customSkins=[...Array(12)].map((_,i)=>({c:i,s:null}));renderNames();$('addRow').style.display='none';$('difRow').style.display='block';markDif();$('suStart').onclick=startSoloGame;show('s-setup')}
   else{NET.mode='net';showOnline()}
+}
+// Balance config: all tuning lives here. Bot params + network timeouts.
+const CFG={
+  bot:{
+    react:[[420,700],[280,450],[180,300]],
+    think:[2000,3200],
+    trivAcc:[[.55,.5,.4],[.75,.65,.55],[.92,.85,.75]],
+    guessSpread:[30,18,10],
+    mathDelay:[2600,4200],
+    mathAcc:[.7,1,1]
+  },
+  timeouts:{trivia:20000,poker:20000,hangman:150000,balloon:120000,dice:12000,war:12000,hilo:10000,memory:30000,math:12000,seq:12000,scr:12000,stroop:10000,odd:12000,aim:25000,rps:15000,bingo:6000,type:60000},
+  econ:{ante:5,startChips:100,raiseStep:10}
+};
+const BOTGAMES=new Set(['reaction','trivia','country','guess','math','clicker','aim']);
+let BOT={active:false,name:'CPU',dif:1};
+function botParams(){
+  let d=BOT.dif;
+  const h=players[0]?players[0].score:0,b=players[1]?players[1].score:0;
+  if(h-b>=3)d=Math.min(2,d+1);
+  else if(b-h>=3)d=Math.max(0,d-1);
+  return d;
+}
+// ---- Bot driver core: solo-mode CPU acts through the SAME resolve paths as humans,
+// so scoring, combos and achievements behave identically. Difficulty comes from
+// botParams() (player's picked level + rubber-band DDA on the score gap).
+function isBot(name){return BOT.active&&name===BOT.name}
+function botThink(){const d=botParams(),t=CFG.bot.think;return Math.max(800,t[0]-d*500+Math.random()*(t[1]-t[0]))}
+function setDif(d){BOT.dif=d;beep(600);markDif()}
+function markDif(){for(let i=0;i<3;i++){const b=$('dif'+i);if(b)b.style.borderColor=BOT.dif===i?'var(--yellow)':''}}
+function candidatesFor(letter,used){
+  const out=[];
+  CSET.forEach(c=>{if(c[0]===letter&&!used.has(c))out.push(c)});
+  return out.length?out:[...CSET].filter(c=>c[0]===letter);
+}
+function startSoloGame(){
+  buildPlayers();
+  const h=players[0];
+  players=[h,{name:'CPU',score:0,key:'-',color:'#9aa3ab',emoji:'🤖'}];
+  BOT.active=true;
+  store('names',[h.name]);
+  $('modeTag').textContent=`🤖 2P · ${gname(selectedGame)}`;
+  showIntro(selectedGame);
 }
 let nameCount=2,customKeys=[...KEYS],pendingKey=-1;
 const SKIN_ICONS=['⚡','🔥','👑','💎','🚀','🌙','⭐','🎯','🎧','🏆','💀','🌊'];
-let customSkins=[...Array(8)].map((_,i)=>({c:i,s:null})),skinFor=-1;
+let customSkins=[...Array(12)].map((_,i)=>({c:i,s:null})),skinFor=-1;
 function skinFace(i,name){const sk=customSkins[i];if(sk&&sk.s)return sk.s;return ((name||'').trim()[0]||'?').toUpperCase()}
 function renderNames(){
   const vals=[];
@@ -1294,7 +1382,7 @@ function assignKey(e){
   if(customKeys.some((x,j)=>x===k&&j!==pendingKey)){beep(200);pendingKey=-1;document.onkeydown=null;renderNames();return}
   customKeys[pendingKey]=k;pendingKey=-1;document.onkeydown=null;beep(700);renderNames();
 }
-function addNameField(){if(nameCount<8){nameCount++;renderNames()}}
+function addNameField(){if(nameCount<10){nameCount++;renderNames()}}
 function removeNameField(){if(nameCount>2){nameCount--;renderNames()}}
 function buildPlayers(){
   players=[];
@@ -1316,9 +1404,10 @@ function showIntro(gid){
   $('iIcon').innerHTML=GICON[gid]||'';typeText($('iName'),gname(gid));$('iTag').textContent=g.tag[lang]||g.tag.en;
   $('iSteps').innerHTML=(g.steps[lang]||g.steps.en).map(s=>`<li>${s}</li>`).join('');
   $('iScore').textContent='🏅 '+(g.score[lang]||g.score.en);
-  $('iKeys').innerHTML=(!isNet())?players.map(p=>`<span class="chip" style="border-color:${p.color}">${p.emoji} ${p.name} <kbd>${p.key}</kbd></span>`).join(''):'';
+  $('iKeys').innerHTML=(!isNet())?players.map(p=>`<span class="chip" style="border-color:${p.color}">${p.emoji} ${p.name}${p.key&&p.key!=='-'?` <kbd>${p.key}</kbd>`:''}</span>`).join(''):'';
   $('iGo').style.display=(isNet()&&!NET.isHost)?'none':'block';
   $('iGo').onclick=()=>beginGame(gid);
+  renderRq();
 }
 function introGo(){beginGame(selectedGame)}
 function beginGame(gid){
@@ -1372,6 +1461,10 @@ function showResult(){
   const g=ginfo(selectedGame);
   typeText($('resTitle'),tie?t('tie'):t('wins')(winner.name));if(winner){unlockAch('champ');WINS[winner.name]=(WINS[winner.name]||0)+1}
   $('resSub').textContent=t('resSub')(g.icon+' '+(g.name[lang]||g.name.en));
+  if(TQ&&TQ.totals){
+    const order=players.map((p,i)=>({n:p.name,t:TQ.totals[i]||0})).sort((a,b)=>b.t-a.t).slice(0,3);
+    $('resSub').textContent+=` · 🏆 ${order.map(o=>`${o.n} ${o.t}`).join(', ')}`;
+  }
   $('resList').innerHTML=s.map((p,i)=>`<div class="stand"><span>${i===0&&!tie?'🥇':i===1?'🥈':i===2?'🥉':(i+1)+'.'}</span><span class="avatar" style="background:${p.color}">${p.emoji}</span><span>${p.name}</span><span class="pts">${p.score}</span></div>`).join('');
   const guest=isNet()&&!NET.isHost;
   $('resAgain').style.display=guest?'none':'block';
@@ -1389,9 +1482,9 @@ function playAgain(){
   showIntro(selectedGame);
 }
 function backToGames(){
-  stopAll();TQ=null;tqSel=[];
+  stopAll();TQ=null;tqSel=[];BOT.active=false;
   if(isNet()&&NET.isHost)broadcast({t:'to-menu'});
-  routeMenu();
+  showGames();
 }
 // ============ 1. REACTION ============
 let R=null;
@@ -1403,12 +1496,12 @@ function startReaction(){
 function rxnInputs(){
   if(isNet()){$('rKeys').innerHTML='';$('rTouch').innerHTML='';return}
   $('rKeys').innerHTML='';
-  $('rTouch').innerHTML=players.map(p=>touchBtn(p,'rxnTap',R.fouled.has(p.name))).join('');
+  $('rTouch').innerHTML=players.filter(p=>!isBot(p.name)).map(p=>touchBtn(p,'rxnTap',R.fouled.has(p.name))).join('');
 }
 function nextRxnRound(){
-  if(R.round>=3){gameFinished();return}
+  if(R.round>=RD('reaction',3)){gameFinished();return}
   R.round++;R.tok=(R.tok||0)+1;R.phase='red';R.fouled=new Set();R.taps=[];
-  $('rRound').textContent=t('roundOf')(R.round,3);
+  $('rRound').textContent=t('roundOf')(R.round,RD('reaction',3));
   const st=$('rStage');st.className='big-stage red';
   $('rTitle').textContent=t('rWait');
   $('rSub').textContent=isNet()?t('rWaitNet'):t('rWaitP');
@@ -1424,7 +1517,7 @@ function amberFlash(){
   const st=$('rStage');st.className='big-stage amber';$('rTitle').textContent='🟡 WAIT…';beep(440);
   later(()=>{if(R&&R.phase==='red'){st.className='big-stage red';$('rTitle').textContent=t('rWait')}},450);
 }
-function localRxnGreen(){if(!R||R.phase!=='red')return;R.phase='green';R.greenAt=performance.now();const st=$('rStage');st.className='big-stage green';$('rTitle').textContent=t('rGo');$('rSub').textContent=t('rGoP');beep(750)}
+function localRxnGreen(){if(!R||R.phase!=='red')return;R.phase='green';R.greenAt=performance.now();const st=$('rStage');st.className='big-stage green';$('rTitle').textContent=t('rGo');$('rSub').textContent=t('rGoP');beep(750);if(BOT.active)players.forEach(p=>{if(isBot(p.name)){const d=botParams(),r=CFG.bot.react[d];later(()=>rxnTap(p.name),r[0]+Math.random()*(r[1]-r[0]))}})}
 function scheduleRxn(host){
   const d=rxnDelay(),go=host?hostRxnGreen:localRxnGreen,tk=R?R.tok:0;
   const fire=()=>{if(R&&R.tok===tk)go()};
@@ -1498,9 +1591,19 @@ function nextTqTurn(){
   const name=players[T.turn].name,Q=tqPickQ();
   T.cur={name,q:Q.q,o:Q.o,a:Q.a};T.open=true;
   renderTqTurn();
+  if(BOT.active&&!isNet()&&name===BOT.name){
+    [...$('tOpts').children].forEach(b=>b.disabled=true);
+    msg('tFeed','🤖 …');
+    later(()=>{if(!T||!T.open||T.cur.name!==BOT.name)return;
+      const d=botParams(),ti=tqTier()==='easy'?0:tqTier()==='med'?1:2;
+      const ok=Math.random()<CFG.bot.trivAcc[d][ti];
+      answerTq(ok?T.cur.a:[0,1,2,3].filter(i=>i!==T.cur.a)[Math.floor(Math.random()*3)]);
+    },botThink());
+    return;
+  }
   if(isNet()&&NET.isHost){
     broadcast({t:'tq-turn',name,q:Q.q,o:Q.o,level:tqLevelName(),round:T.round,alive:T.alive,scores:players.map(p=>p.score),feed:T.last});
-    if(name!==players[0].name)later(()=>{if(T&&T.open&&T.cur&&T.cur.name===name){T.open=false;tqResolve(name,-1)}},HARD?12000:20000);
+    if(name!==players[0].name)later(()=>{if(T&&T.open&&T.cur&&T.cur.name===name){T.open=false;tqResolve(name,-1)}},HARD?12000:CFG.timeouts.trivia);
   }
 }
 function renderTqTurn(){
@@ -1548,7 +1651,7 @@ function startCountry(){
   C={letter:LETTERS[Math.floor(Math.random()*LETTERS.length)],used:new Set(),turn:0,round:0,claims:[],need:0};
   $('cInput').value='';$('cInput').disabled=false;
   $('cHint').textContent=t('cHint')+' '+t('cEnNote');
-  if(isNet()&&!NET.isHost){$('cTurn').innerHTML=`<div class="avatar">⏳</div><span>${t('waitHost')}</span>`;msg('cFeed','');return}
+  if(isNet()&&!NET.isHost){$('cInput').disabled=true;$('cTurn').innerHTML=`<div class="avatar">⏳</div><span>${t('waitHost')}</span>`;msg('cFeed','');return}
   if(isNet()){C.need=Math.min(3,players.length);broadcast({t:'ct-letter',letter:C.letter});showCountryHost();$('cInput').onkeydown=hostCountryEnter}
   else{C.round=0;C.turn=0;showCountryTurn()}
 }
@@ -1560,11 +1663,21 @@ function showCountryHost(){
 function showCountryTurn(){
   const p=players[C.turn];
   $('cLetter').innerHTML=`<span class="tile">${C.letter}</span>`;
-  const total=players.length*2,n=C.round*players.length+C.turn+1;
+  const total=players.length*RD('country',2),n=C.round*players.length+C.turn+1;
   $('cTurn').innerHTML=`<div class="avatar" style="background:${p.color}">${p.emoji}</div><span>${t('roundOf')(n,total)}: <b>${p.name}</b> — “${C.letter}”</span>`;
   $('cTurn').style.borderColor=p.color;
   msg('cFeed','');$('cInput').value='';setTimeout(()=>$('cInput').focus(),60);
   $('cInput').onkeydown=e=>{if(e.key==='Enter')submitCountryLocal()};
+  if(BOT.active&&!isNet()&&p.name===BOT.name){
+    $('cInput').disabled=true;msg('cFeed','🤖 …');
+    later(()=>{if(!C)return;
+      const d=botParams(),opts=candidatesFor(C.letter,C.used);
+      const sharp=[.7,.85,.95][d];
+      const pick=(opts.length&&Math.random()<sharp)?opts[Math.floor(Math.random()*opts.length)]:'???';
+      $('cInput').value=pick;$('cInput').disabled=false;submitCountryLocal();
+    },botThink());
+    return;
+  }
   C.tok=(C.tok||0)+1;const tk=C.tok;let left=HARD?8:12;
   C.bb=$('cTurn').innerHTML;
   const tick=()=>{
@@ -1589,7 +1702,7 @@ function advanceCountryTurn(){
   later(()=>{
     C.turn++;
     if(C.turn>=players.length){C.turn=0;C.round++;C.letter=LETTERS[Math.floor(Math.random()*LETTERS.length)]}
-    if(C.round>=2){gameFinished();return}
+    if(C.round>=RD('country',2)){gameFinished();return}
     showCountryTurn();
   },1400);
 }
@@ -1612,7 +1725,7 @@ function checkCountryDone(){
 let K=null;
 function startClicker(){
   show('s-clicker');renderScores();
-  K={turn:0,counts:{},n:0,active:false};
+  K={turn:0,round:1,counts:{},n:0,active:false};
   players.forEach(p=>K.counts[p.name]=0);
   $('kCount').textContent='0';$('kTime').style.width='0%';
   if(isNet()&&!NET.isHost){$('kTurn').innerHTML=`<div class="avatar">⏳</div><span>${t('waitHost')}</span>`;$('kBtn').disabled=true;$('kBtn').textContent='👆';msg('kFeed','');return}
@@ -1623,11 +1736,18 @@ function nextClickerLocal(){
   if(K.turn>=players.length){
     const s=[...players].sort((a,b)=>K.counts[b.name]-K.counts[a.name]);
     s.slice(0,3).forEach((p,i)=>addScore(p.name,[3,2,1][i]));
-    msg('kFeed',t('kWin')(s[0].emoji,s[0].name,K.counts[s[0].name]),'win');
-    $('kTurn').innerHTML=`<div class="avatar">🏁</div><span>${s.map(p=>`${p.emoji} ${p.name}: ${K.counts[p.name]}`).join(' · ')}</span>`;
-    renderScores();confetti();later(gameFinished,2800);return;
+    renderScores();
+    if(K.round>=RD('clicker',1)){
+      msg('kFeed',t('kWin')(s[0].emoji,s[0].name,K.counts[s[0].name]),'win');
+      $('kTurn').innerHTML=`<div class="avatar">🏁</div><span>${s.map(p=>`${p.emoji} ${p.name}: ${K.counts[p.name]}`).join(' · ')}</span>`;
+      confetti();later(gameFinished,2800);return;
+    }
+    msg('kFeed',t('roundWin')(s[0].name)+' · '+t('roundOf')(K.round+1,RD('clicker',1)),'win');
+    K.round++;K.turn=0;
+    later(nextClickerLocal,1600);return;
   }
   const p=players[K.turn];K.n=0;K.active=false;
+  if(K.barIv)clearInterval(K.barIv);
   $('kCount').textContent='0';$('kTime').style.width='0%';
   setTurnBanner('kTurn',p,t('kStep1')(p.name));
   msg('kFeed',t('kTurn')(p.emoji,p.name));
@@ -1635,11 +1755,18 @@ function nextClickerLocal(){
   $('kBtn').onclick=()=>{
     beep(600);$('kBtn').textContent=t('kMash');msg('kFeed',t('kGo'));K.active=true;
     const t0=Date.now();
-    every(100,()=>{$('kTime').style.width=Math.min(100,(Date.now()-t0)/(HARD?4000:5000)*100)+'%'});
+    K.barIv=every(100,()=>{$('kTime').style.width=Math.min(100,(Date.now()-t0)/(HARD?4000:5000)*100)+'%'});
     $('kBtn').onclick=()=>{if(!K.active)return;K.n++;$('kCount').textContent=K.n};
     document.onkeydown=e=>{if(K.active&&players[K.turn]&&e.key.toUpperCase()===players[K.turn].key){K.n++;$('kCount').textContent=K.n}};
     later(()=>{K.active=false;document.onkeydown=null;K.counts[p.name]=K.n;$('kBtn').disabled=true;msg('kFeed',t('kScore')(p.emoji,p.name,K.n),'win');K.turn++;later(nextClickerLocal,1400)},HARD?4000:5000);
   };
+  if(BOT.active&&!isNet()&&p.name===BOT.name){
+    $('kBtn').disabled=true;msg('kFeed',t('kTurn')(p.emoji,p.name)+' 🤖');
+    $('kBtn').onclick();
+    const rate=[75,55,38][botParams()];
+    const iv=setInterval(()=>{if(!K||!K.active){clearInterval(iv);return}K.n++;$('kCount').textContent=K.n},rate);
+    return;
+  }
 }
 function hostClicker(){
   setTurnBanner('kTurn',players[0],t('kNow'));
@@ -1657,18 +1784,21 @@ function closeClickerHost(){
   broadcast({t:'ck-result',counts:K.counts,winners:s.slice(0,3).map(p=>p.name),scores:players.map(p=>p.score)});
   msg('kFeed','🏆 '+s.slice(0,3).map(p=>`${p.name} (${K.counts[p.name]||0})`).join(' · '),'win');
   $('kTurn').innerHTML=`<div class="avatar">🏁</div><span>${s.map(p=>`${p.emoji} ${p.name}: ${K.counts[p.name]||0}`).join(' · ')}</span>`;
-  renderScores();later(gameFinished,2800);
+  renderScores();
+  K.round=(K.round||1)+1;
+  if(K.round>RD('clicker',1)){later(gameFinished,2800);return}
+  later(()=>{if(!K)return;hostClicker()},2600);
 }
 
 // ============ 5. GUESS ============
 let GU=null;
 function startGuess(){
   show('s-guess');renderScores();
-  GU={round:0,total:isNet()?2:3,target:1+Math.floor(Math.random()*100),entries:[],turn:0};
+  GU={round:0,total:RD('guess',3),target:1+Math.floor(Math.random()*100),entries:[],turn:0};
   $('gInput').value='';$('gInput').disabled=false;
   $('gInput').type=(!isNet()&&isPhone())?'password':'number';
   $('gBtn').textContent=t('gLock');
-  if(isNet()&&!NET.isHost){$('gTurn').innerHTML=`<div class="avatar">🔢</div><span>${t('gYour')(1,GU.total)}</span>`;msg('gFeed',t('gClose'));return}
+  if(isNet()&&!NET.isHost){$('gInput').disabled=true;$('gTurn').innerHTML=`<div class="avatar">🔢</div><span>${t('gYour')(1,GU.total)}</span>`;msg('gFeed',t('gClose'));return}
   if(isNet()){broadcast({t:'gs-round',round:1,total:GU.total});$('gTurn').innerHTML=`<div class="avatar">🔢</div><span>${t('gYour')(1,GU.total)}</span>`;msg('gFeed',t('gWait')(0,players.length))}
   else promptGuessLocal();
 }
@@ -1678,6 +1808,11 @@ function promptGuessLocal(){
   $('gTurn').innerHTML=`<div class="avatar" style="background:${p.color}">${p.emoji}</div><span>${t('gSecret')(p.name,GU.round+1,GU.total)}</span>`;
   $('gTurn').style.borderColor=p.color;
   msg('gFeed',t('gLook'));$('gInput').value='';setTimeout(()=>$('gInput').focus(),60);
+  if(BOT.active&&p.name===BOT.name){
+    $('gInput').disabled=true;msg('gFeed','🤖 …');
+    later(()=>{if(!GU)return;const d=botParams(),sp=CFG.bot.guessSpread[d];const g=Math.min(100,Math.max(1,GU.target+Math.floor(Math.random()*(sp*2+1))-sp));$('gInput').value=g;$('gInput').disabled=false;submitGuess()},botThink());
+    return;
+  }
 }
 function submitGuess(){
   const v=parseInt($('gInput').value,10);
@@ -1758,7 +1893,7 @@ function rpsPick(name,s){
 }
 function hostRpsWait(){
   const rd=RPS.round;
-  later(()=>{if(RPS&&RPS.round===rd&&!RPS.reveal){RPS.alive.forEach(n=>{if(!RPS.picks[n])RPS.picks[n]=SIGNS[Math.floor(Math.random()*3)]});resolveRps()}},15000);
+  later(()=>{if(RPS&&RPS.round===rd&&!RPS.reveal){RPS.alive.forEach(n=>{if(!RPS.picks[n])RPS.picks[n]=SIGNS[Math.floor(Math.random()*3)]});resolveRps()}},CFG.timeouts.rps);
 }
 function rpsOutcome(){
   const set=[...new Set(RPS.alive.map(n=>RPS.picks[n]))];
@@ -1836,9 +1971,9 @@ function diceListHTML(){
   }).join('');
 }
 function nextDiceLocal(){
-  if(DICE.round>3){gameFinished();return}
+  if(DICE.round>RD('dice',3)){gameFinished();return}
   const name=DICE.rollers[DICE.turn],p=players.find(x=>x.name===name);
-  $('diceRound').textContent=t('roundOf')(DICE.round,3);
+  $('diceRound').textContent=t('roundOf')(DICE.round,RD('dice',3));
   $('diceFace').innerHTML=FACES[5];$('diceList').innerHTML=diceListHTML();
   msg('diceFeed',t('yourTurn')(p.emoji,name));
   $('diceBtn').disabled=false;$('diceBtn').textContent=t('roll')+` — ${name}`;
@@ -1877,7 +2012,7 @@ function finishDiceRoll(name,v){
   },1200);
 }
 function renderDiceHost(){
-  $('diceRound').textContent=t('roundOf')(DICE.round,3);
+  $('diceRound').textContent=t('roundOf')(DICE.round,RD('dice',3));
   $('diceFace').innerHTML=FACES[5];$('diceList').innerHTML=diceListHTML();
   const me=players[0].name;
   if(DICE.rolls[me]){msg('diceFeed',t('locked'));$('diceBtn').disabled=true}
@@ -1886,7 +2021,7 @@ function renderDiceHost(){
 function animDiceFace(v){let n=0;beep(600);const iv=setInterval(()=>{if(!$('s-dice').classList.contains('active')){clearInterval(iv);return}$('diceFace').innerHTML=FACES[Math.floor(Math.random()*6)];if(++n>6){clearInterval(iv);$('diceFace').innerHTML=FACES[v-1];$('diceList').innerHTML=diceListHTML()}},80)}
 function hostDiceWait(){
   const rd=DICE.round;
-  later(()=>{if(DICE&&DICE.round===rd&&!DICE.closed){players.forEach(p=>{if(!DICE.rolls[p.name])DICE.rolls[p.name]=1+Math.floor(Math.random()*6)});closeDiceHost()}},12000);
+  later(()=>{if(DICE&&DICE.round===rd&&!DICE.closed){players.forEach(p=>{if(!DICE.rolls[p.name])DICE.rolls[p.name]=1+Math.floor(Math.random()*6)});closeDiceHost()}},CFG.timeouts.dice);
 }
 function checkDiceHost(){if(DICE&&!DICE.closed&&Object.keys(DICE.rolls).length>=players.length)closeDiceHost()}
 function closeDiceHost(){
@@ -1913,7 +2048,7 @@ function startHilo(){
   show('s-hilo');renderScores();
   HILO={turn:0,card:drawCard(),streak:0,used:0,round:1,guesses:{},closed:false};
   $('hiloH').textContent=t('higher');$('hiloL').textContent=t('lower');
-  if(isNet()&&!NET.isHost){msg('hiloFeed',t('waitHost'));return}
+  if(isNet()&&!NET.isHost){hiloSetBtns(false);msg('hiloFeed',t('waitHost'));return}
   if(isNet()){broadcast({t:'hilo-card',card:HILO.card,round:1});renderHiloHost();hostHiloWait()}
   else{HILO.done=false;hiloPrompt()}
 }
@@ -1953,7 +2088,7 @@ function hostHiloSelf(d){
   checkHiloHost();
 }
 function checkHiloHost(){if(HILO&&!HILO.closed&&Object.keys(HILO.guesses).length>=players.length)closeHiloHost()}
-function hostHiloWait(){later(()=>{if(HILO&&!HILO.closed)closeHiloHost()},10000)}
+function hostHiloWait(){later(()=>{if(HILO&&!HILO.closed)closeHiloHost()},CFG.timeouts.hilo)}
 function closeHiloHost(){
   if(!HILO||HILO.closed)return;HILO.closed=true;
   const next=drawCard(),prev=HILO.card;
@@ -1990,6 +2125,7 @@ const memBack=`<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18"
 function startMem(){
   show('s-mem');renderScores();
   MEM={board:shuffle([...MEMO,...MEMO]),matched:{},turn:0,open:[],lock:false};
+  for(const k in MEM_SEEN)delete MEM_SEEN[k];
   if(isNet()&&!NET.isHost){msg('memFeed',t('waitHost'));return}
   if(isNet()){broadcast({t:'mem-start',board:MEM.board,turn:players[0].name});renderMem()}
   else renderMem();
@@ -2010,6 +2146,27 @@ function renderMem(){
   const p=players[MEM.turn];
   setTurnBanner('memTurn',p,t('yourTurn')(p.emoji,p.name));
   drawMemGrid();msg('memFeed',t('flip2'));
+  if(BOT.active&&!isNet()&&p.isCPU){
+    msg('memFeed','🤖 …');
+    later(()=>cpuMemPlay(),1200);
+  }
+}
+function cpuMemPlay(){
+  if(!MEM)return;
+  const un=MEM.board.map((e,i)=>i).filter(i=>MEM.matched[i]===undefined&&!MEM.open.includes(i));
+  if(un.length<2)return;
+  const byE={};un.forEach(i=>{const e=MEM_SEEN[i];if(e!==undefined){(byE[e]=byE[e]||[]).push(i)}});
+  let a,b;
+  for(const e in byE)if(byE[e].length>=2){a=byE[e][0];b=byE[e][1];break}
+  if(a===undefined){
+    a=un[Math.floor(Math.random()*un.length)];
+    const ae=MEM.board[a];
+    const known=un.find(i=>i!==a&&MEM_SEEN[i]===ae);
+    if(known!==undefined&&Math.random()<0.85)b=known;
+    else{const rest=un.filter(i=>i!==a);b=rest[Math.floor(Math.random()*rest.length)]}
+  }
+  memFlip(a);
+  later(()=>{if(MEM)memFlip(b)},700);
 }
 function memFlip(i){
   if(!MEM||MEM.lock||Object.keys(MEM.matched).length>=16||MEM.matched[i]!==undefined||MEM.open.includes(i))return;
@@ -2021,6 +2178,7 @@ function memFlip(i){
 function memSecond(){
   MEM.lock=true;
   const[a,b]=MEM.open,match=MEM.board[a]===MEM.board[b],name=memTurnName();
+  if(MEM.board){MEM_SEEN[a]=MEM.board[a];MEM_SEEN[b]=MEM.board[b]}
   if(isNet()){
     broadcast({t:'mem-show',a,b});
     later(()=>{if(!MEM)return;memDoResolve(a,b,match,name);broadcast({t:'mem-state',matched:MEM.matched,turn:memTurnName(),scores:players.map(p=>p.score),last:{match,by:name}});if(Object.keys(MEM.matched).length>=16)later(gameFinished,1500)},1100);
@@ -2111,7 +2269,7 @@ function bingoDraw(){
   if(isNet()&&NET.isHost){
     broadcast({t:'bingo-draw',n,left:BINGO.pile.length});
     renderBingoHost();
-    if(!BINGO.pile.length){BINGO.tally={[players[0].name]:BINGO.marks[players[0].name].length};broadcast({t:'bingo-tally'});later(closeBingoTally,6000)}
+    if(!BINGO.pile.length){BINGO.tally={[players[0].name]:BINGO.marks[players[0].name].length};broadcast({t:'bingo-tally'});later(closeBingoTally,CFG.timeouts.bingo)}
     return;
   }
   renderBingoLocal();
@@ -2173,19 +2331,19 @@ function pkCardHTML(c,down){
 function startPoker(){
   show('s-poker');renderScores();
   PK={stacks:{},hand:0,deck:[],comm:[],hole:{},pot:0,inHand:[],folded:{},bet:0,committed:{},turn:0,street:0,done:false,peek:false};
-  players.forEach(p=>PK.stacks[p.name]=100);
+  players.forEach(p=>PK.stacks[p.name]=CFG.econ.startChips);
   $('pkF').textContent=t('fold');$('pkR').textContent=t('raise');$('pkPeek').textContent=t('peek');
   $('pkPeek').onmousedown=$('pkPeek').ontouchstart=e=>{if(e&&e.preventDefault)e.preventDefault();pkPeekDown()};
   $('pkPeek').onmouseup=$('pkPeek').onmouseleave=$('pkPeek').ontouchend=()=>pkPeekUp();
-  if(isNet()&&!NET.isHost){msg('pkFeed',t('waitHost'));return}
+  if(isNet()&&!NET.isHost){pokerSetBtns(false,0);msg('pkFeed',t('waitHost'));return}
   nextPokerHand();
 }
 function nextPokerHand(){
-  if(PK.hand>=3||players.filter(p=>PK.stacks[p.name]>0).length<2){pokerGameOver();return}
+  if(PK.hand>=RD('poker',3)||players.filter(p=>PK.stacks[p.name]>0).length<2){pokerGameOver();return}
   if(isNet()&&!NET.isHost)return;
   PK.hand++;PK.deck=newDeck();
   PK.inHand=players.filter(p=>PK.stacks[p.name]>0).map(p=>p.name);
-  PK.inHand.forEach(n=>{const a=Math.min(5,PK.stacks[n]);PK.stacks[n]-=a;PK.pot+=a});
+  PK.inHand.forEach(n=>{const a=Math.min(CFG.econ.ante,PK.stacks[n]);PK.stacks[n]-=a;PK.pot+=a});
   PK.hole={};PK.inHand.forEach(n=>{PK.hole[n]=[PK.deck.pop(),PK.deck.pop()]});
   PK.comm=[];PK.street=0;PK.turn=0;PK.folded={};PK.bet=0;PK.committed={};PK.done=false;PK.peek=false;
   renderScores();
@@ -2200,7 +2358,7 @@ function pkStacksHTML(){
 }
 function renderPoker(showAll,focusName){
   $('pkComm').innerHTML=PK.comm.length?PK.comm.map(c=>pkCardHTML(c)).join(''):`<span class="small">${t('streetN')[0]}…</span>`;
-  $('pkPot').innerHTML=`🪙 ${t('pot')}: <b>${PK.pot}</b> · ${t('ante')(5)}<br><div class="scorestrip" style="justify-content:center;margin-top:6px">${pkStacksHTML()}</div>`;
+  $('pkPot').innerHTML=`🪙 ${t('pot')}: <b>${PK.pot}</b> · ${t('ante')(CFG.econ.ante)}<br><div class="scorestrip" style="justify-content:center;margin-top:6px">${pkStacksHTML()}</div>`;
   const turnName=focusName||(PK.inHand[PK.turn]||'');
   const p=players.find(x=>x.name===turnName);
   const faceUp=showAll||(isNet()&&NET.isHost&&turnName===players[0].name)||(!isNet()&&!!PK.peek);
@@ -2234,10 +2392,30 @@ function pokerPrompt(){
   pokerSetBtns(true,need);
   msg('pkFeed',t('yourTurn')(players.find(x=>x.name===name).emoji,name));
   $('pkF').onclick=()=>pokerAct('f');$('pkC').onclick=()=>pokerAct('c');$('pkR').onclick=()=>pokerAct('r');
+  if(BOT.active&&!isNet()&&players.find(x=>x.name===name).isCPU){
+    pokerSetBtns(false,0);msg('pkFeed','🤖 …');
+    later(()=>cpuPokerAct(name),botThink());
+  }
+}
+const MEM_SEEN={};
+function cpuPokerAct(name){
+  if(!PK||PK.done)return;
+  const hole=PK.hole[name]||[];
+  const ranks=hole.map(c=>c.r);
+  let strength=ranks.length?Math.max(...ranks)/14:0;
+  if(ranks.length===2&&ranks[0]===ranks[1])strength=Math.max(strength,0.75);
+  if(PK.comm.length>=3){try{const h=evalHand([...hole,...PK.comm]);strength=Math.max(strength,h[0]/8)}catch(e){}}
+  const need=PK.bet-(PK.committed[name]||0);
+  const d=botParams();
+  let a='c';
+  if(strength<0.45&&need>0&&Math.random()<[0.8,0.65,0.5][d])a='f';
+  else if(strength>0.72&&PK.stacks[name]>need+CFG.econ.raiseStep&&Math.random()<[0.05,0.15,0.3][d])a='r';
+  else if(need>PK.stacks[name]*0.5&&strength<0.6&&Math.random()<0.5)a='f';
+  pokerAct(a,name);
 }
 function pkActTimeout(){
   const h=PK.hand,s=PK.street,tn=PK.turn;
-  later(()=>{if(PK&&PK.hand===h&&PK.street===s&&PK.turn===tn&&!PK.done){const name=PK.inHand[PK.turn];const need=PK.bet-(PK.committed[name]||0);pokerAct(need>0?'f':'c',name)}},20000);
+  later(()=>{if(PK&&PK.hand===h&&PK.street===s&&PK.turn===tn&&!PK.done){const name=PK.inHand[PK.turn];const need=PK.bet-(PK.committed[name]||0);pokerAct(need>0?'f':'c',name)}},CFG.timeouts.poker);
 }
 function pokerAct(a,who){
   if(!PK||PK.done)return;
@@ -2246,7 +2424,7 @@ function pokerAct(a,who){
   if(isNet()&&NET.isHost&&!who&&name!==players[0].name)return;
   if(a==='f'){const others=PK.inHand.filter(n=>n!==name&&!PK.folded[n]);if(!others.length){beep(200);return}PK.folded[name]=1;const p=players.find(x=>x.name===name);msg('pkFeed',t('foldedN')(name));beep(220)}
   else{
-    if(a==='r')PK.bet+=10;
+    if(a==='r')PK.bet+=CFG.econ.raiseStep;
     const pay=Math.min(PK.stacks[name],PK.bet-(PK.committed[name]||0));
     PK.stacks[name]-=pay;PK.pot+=pay;PK.committed[name]=(PK.committed[name]||0)+pay;
     beep(600);
@@ -2315,9 +2493,9 @@ function warListHTML(){
   }).join('');
 }
 function nextWarLocal(){
-  if(!WAR||WAR.round>5){gameFinished();return}
+  if(!WAR||WAR.round>RD('war',5)){gameFinished();return}
   WAR.rolls={};
-  $('warRound').textContent=t('roundOf')(WAR.round,5);
+  $('warRound').textContent=t('roundOf')(WAR.round,RD('war',5));
   $('warList').innerHTML=warListHTML();
   msg('warFeed',t('flip'));
   $('warBtn').disabled=false;$('warBtn').onclick=()=>doWarFlip(null);
@@ -2342,7 +2520,7 @@ function doWarFlip(rollers){
   }
 }
 function renderWarHost(){
-  $('warRound').textContent=t('roundOf')(WAR.round,5);
+  $('warRound').textContent=t('roundOf')(WAR.round,RD('war',5));
   $('warList').innerHTML=warListHTML();
   const me=players[0].name;
   if(WAR.rolls[me]){msg('warFeed',t('locked'));$('warBtn').disabled=true}
@@ -2350,7 +2528,7 @@ function renderWarHost(){
 }
 function hostWarWait(){
   const rd=WAR.round;
-  later(()=>{if(WAR&&WAR.round===rd&&!WAR.closed){players.forEach(p=>{if(!WAR.rolls[p.name])WAR.rolls[p.name]=2+Math.floor(Math.random()*13)});closeWarHost()}},12000);
+  later(()=>{if(WAR&&WAR.round===rd&&!WAR.closed){players.forEach(p=>{if(!WAR.rolls[p.name])WAR.rolls[p.name]=2+Math.floor(Math.random()*13)});closeWarHost()}},CFG.timeouts.war);
 }
 function checkWarHost(){if(WAR&&!WAR.closed&&Object.keys(WAR.rolls).length>=players.length)closeWarHost()}
 function closeWarHost(){
@@ -2420,7 +2598,7 @@ function simShowSeq(done){
 }
 function simGuestTimeout(){
   const nm=SIM.alive[SIM.turn],ln=SIM.len;
-  later(()=>{if(SIM&&SIM.alive[SIM.turn]===nm&&SIM.len===ln&&!SIM.accept){simFail(nm)}},30000);
+  later(()=>{if(SIM&&SIM.alive[SIM.turn]===nm&&SIM.len===ln&&!SIM.accept){simFail(nm)}},CFG.timeouts.memory);
 }
 function simTap(i){
   if(isNet()&&!NET.isHost){guestSimTap(i);return}
@@ -2472,14 +2650,14 @@ function guestSimTap(i){
 
 // ============ 14. HANGMAN ============
 let HM=null,GHM=null;
-const WORDS={en:["APPLE","HOUSE","WATER","MUSIC","HORSE","PHONE","BREAD","TIGER"],he:["תפוח","בית","מים","מוסיקה","סוס","טלפון","לחם","נמר"],es:["CASA","AGUA","MUSICA","CABALLO","PAN","TELEFONO","MANZANA","TIGRE"],ar:["بيت","حليب","حصان","خبز","هاتف","عسل","تفاح","نمر"]};
+const WORDS={en:["APPLE","HOUSE","WATER","MUSIC","HORSE","PHONE","BREAD","TIGER","ROCKET","DRAGON","CASTLE","PLANET","GUITAR","BRIDGE","FOREST","THUNDER","WIZARD","PIRATE","VOLCANO","DESERT"],he:["תפוח","בית","מים","מוסיקה","סוס","טלפון","לחם","נמר","חללית","דרקון","טירה","גיטרה","גשר","יער","רעם","קוסם","פיראט","מדבר","אוקיינוס","הר געש"],es:["CASA","AGUA","MUSICA","CABALLO","PAN","TELEFONO","MANZANA","TIGRE","COHETE","CASTILLO","PLANETA","GUITARRA","PUENTE","BOSQUE","TRUENO","MAGO","PIRATA","VOLCAN","DESIERTO","TORMENTA"],ar:["بيت","حليب","حصان","خبز","هاتف","عسل","تفاح","نمر","صاروخ","تنين","قلعة","كوكب","غيتار","جسر","غابة","رعد","ساحر","قرصان","بركان","صحراء"]};
 const KBS={en:"ABCDEFGHIJKLMNOPQRSTUVWXYZ".split(""),he:["א","ב","ג","ד","ה","ו","ז","ח","ט","י","כ","ל","מ","נ","ס","ע","פ","צ","ק","ר","ש","ת"],es:["A","B","C","D","E","F","G","H","I","J","K","L","M","N","Ñ","O","P","Q","R","S","T","U","V","W","X","Y","Z"],ar:["ا","ب","ت","ث","ج","ح","خ","د","ذ","ر","ز","س","ش","ص","ض","ط","ظ","ع","غ","ف","ق","ك","ل","م","ن","ه","و","ي"]};
 function normHeb(s){return s.replace(/ך/g,'כ').replace(/ם/g,'מ').replace(/ן/g,'נ').replace(/ף/g,'פ').replace(/ץ/g,'צ')}
 function lhN(ch){return lang==='he'?normHeb(ch):ch}
 function startHang(){
   show('s-hang');renderScores();
   $('hangKeys').innerHTML=(KBS[lang]||KBS.en).map(l=>`<button class="kb" data-l="${l}" onclick="hmPick('${l}')">${l}</button>`).join('');
-  if(isNet()&&!NET.isHost){if(!GHM)msg('hangFeed',t('waitHost'));return}
+  if(isNet()&&!NET.isHost){if(!GHM){[...$('hangKeys').children].forEach(b=>b.disabled=true);msg('hangFeed',t('waitHost'))}return}
   HM={turn:0,order:players.map(p=>p.name),words:shuffle([...(WORDS[lang]||WORDS.en)]),cur:null,done:{},timerSet:false};
   if(isNet()){
     HM.order.forEach(n=>{if(n!==players[0].name){const w=hmNewWord();sendTo(n,{t:'hm-word',word:w})}});
@@ -2576,11 +2754,11 @@ function startBalloon(){
   if(isNet()){broadcast({t:'bl-go'});hostBlWait()}
   nextBlTurn();
 }
-function hostBlWait(){later(()=>{if(BL){players.forEach(p=>{if(BL.done[p.name]===undefined){BL.done[p.name]=0}});closeBlHost()}},120000)}
+function hostBlWait(){later(()=>{if(BL){players.forEach(p=>{if(BL.done[p.name]===undefined){BL.done[p.name]=0}});closeBlHost()}},CFG.timeouts.balloon)}
 function nextBlTurn(){
   if(!BL)return;
   if(BL.turn>=players.length){BL.turn=0;BL.round++}
-  if(BL.round>3){
+  if(BL.round>RD('balloon',3)){
     if(isNet()){BL.done[players[0].name]=BL.done[players[0].name]||0;checkBlHost()}
     else gameFinished();
     return;
@@ -2591,7 +2769,7 @@ function nextBlTurn(){
   blShow($('blBalloon'),0);
   $('blCount').textContent='0';
   BL.ticks=0;BL.popAt=HARD?(4+Math.floor(Math.random()*8)):(5+Math.floor(Math.random()*10));BL.holding=false;
-  msg('blFeed',t('blHint')+` (${t('roundOf')(BL.round,3)})`);
+  msg('blFeed',t('blHint')+` (${t('roundOf')(BL.round,RD('balloon',3))})`);
   const btn=$('blBtn');btn.disabled=false;btn.textContent=t('hold');
   if(isNet()&&name!==players[0].name){btn.disabled=true;msg('blFeed',t('watching')(name));return}
   btn.onmousedown=btn.ontouchstart=e=>{if(e)e.preventDefault();blHold()};
@@ -2660,7 +2838,7 @@ function guestBlRelease(){
   GBTOT+=GBL.ticks||0;GBL.round++;comboHit(NET.myName);
   $('blBtn').disabled=true;
   msg('blFeed',t('banked')(GBL.ticks||0),'win');beep(880);
-  if(GBL.round>3){sendHost({t:'bl-done',pts:GBTOT});msg('blFeed',t('waitHost'))}
+  if(GBL.round>RD('balloon',3)){sendHost({t:'bl-done',pts:GBTOT});msg('blFeed',t('waitHost'))}
   else guestBlRound();
 }
 function guestBlPop(){
@@ -2668,15 +2846,15 @@ function guestBlPop(){
   $('blBtn').disabled=true;
   msg('blFeed',t('popped'),'lose');beep(150,.4);shakeIt(true);comboMiss(NET.myName);
   GBL.round++;
-  if(GBL.round>3){sendHost({t:'bl-done',pts:GBTOT});later(()=>msg('blFeed',t('waitHost')),1500)}
+  if(GBL.round>RD('balloon',3)){sendHost({t:'bl-done',pts:GBTOT});later(()=>msg('blFeed',t('waitHost')),1500)}
   else later(guestBlRound,1700);
 }
 function guestBlRound(){
   blShow($('blBalloon'),0);
   $('blCount').textContent='0';
   GBL.ticks=0;GBL.popAt=HARD?(4+Math.floor(Math.random()*8)):(5+Math.floor(Math.random()*10));GBL.holding=false;
-  $('blTurn').innerHTML=`<div class="avatar">🎈</div><span>${t('gYour')(GBL.round,3)}</span>`;
-  msg('blFeed',t('blHint')+` (${t('roundOf')(GBL.round,3)})`);
+  $('blTurn').innerHTML=`<div class="avatar">🎈</div><span>${t('gYour')(GBL.round,RD('balloon',3))}</span>`;
+  msg('blFeed',t('blHint')+` (${t('roundOf')(GBL.round,RD('balloon',3))})`);
   const btn=$('blBtn');btn.disabled=false;btn.textContent=t('hold');
   btn.onmousedown=btn.ontouchstart=e=>{if(e)e.preventDefault();guestBlHold()};
   btn.onmouseup=btn.onmouseleave=btn.ontouchend=()=>guestBlRelease();
@@ -2688,31 +2866,41 @@ function startAim(){
   show('s-aim');renderScores();
   AIM={turn:0,round:1,pos:0,dir:1,tok:0};
   $('aimBtn').textContent=t('aimStop');
-  if(isNet()&&!NET.isHost){msg('aimFeed',t('waitHost'));return}
+  if(isNet()&&!NET.isHost){$('aimBtn').disabled=true;msg('aimFeed',t('waitHost'));return}
   nextAimTurn();
 }
 function nextAimTurn(){
   if(!AIM)return;
   if(AIM.turn>=players.length){AIM.turn=0;AIM.round++}
-  if(AIM.round>2){gameFinished();return}
+  if(AIM.round>RD('aim',2)){gameFinished();return}
   const p=players[AIM.turn];
-  $('aimTurn').textContent=t('roundOf')(AIM.round,2)+' · '+p.emoji+' '+p.name;
+  $('aimTurn').textContent=t('roundOf')(AIM.round,RD('aim',2))+' · '+p.emoji+' '+p.name;
   renderScores();
   if(isNet()&&NET.isHost&&p.name!==players[0].name){
     broadcast({t:'aim-turn',name:p.name,round:AIM.round});
     msg('aimFeed',t('watching')(p.name));
     const nm=p.name,rd=AIM.round;
-    later(()=>{if(AIM&&AIM.round===rd&&AIM.turn<players.length&&players[AIM.turn].name===nm){AIM.turn++;nextAimTurn()}},25000);
+    later(()=>{if(AIM&&AIM.round===rd&&AIM.turn<players.length&&players[AIM.turn].name===nm){AIM.turn++;nextAimTurn()}},CFG.timeouts.aim);
     return;
   }
   if(isNet()&&!NET.isHost)return;
+  if(BOT.active&&p.name===BOT.name){runAimCPU();return}
   runAimLocal(false);
+}
+function runAimCPU(){
+  AIM.pos=0;AIM.dir=1;AIM.tok++;const tk=AIM.tok;
+  const d=botParams(),tgt=50+(((Math.random()+Math.random()+Math.random())/3)*2-1)*[26,18,10][d];
+  $('aimBtn').disabled=true;msg('aimFeed','🤖 …');
+  const iv=setInterval(()=>{if(!AIM||AIM.tok!==tk){clearInterval(iv);return}
+    AIM.pos+=AIM.dir*4.2;if(AIM.pos>=100){AIM.pos=100;AIM.dir=-1}if(AIM.pos<=0){AIM.pos=0;AIM.dir=1}
+    const m=$('aimMark');if(m)m.style.left=AIM.pos+'%';
+    if((AIM.dir>0&&AIM.pos>=tgt)||(AIM.dir<0&&AIM.pos<=tgt)){AIM.tok++;clearInterval(iv);aimScore(false)}},30);
 }
 function runAimLocal(guest){
   AIM.pos=0;AIM.dir=1;AIM.tok++;
   const tk=AIM.tok;
   $('aimBtn').disabled=false;
-  msg('aimFeed',t('roundOf')(AIM.round,2));
+  msg('aimFeed',t('roundOf')(AIM.round,RD('aim',2)));
   const iv=setInterval(()=>{
     if(!AIM||AIM.tok!==tk||!$('s-aim').classList.contains('active')){clearInterval(iv);return}
     AIM.pos+=AIM.dir*(HARD?5.2:4.2);
@@ -2746,17 +2934,22 @@ function startMath(){
   show('s-math');renderScores();
   $('mathGo').textContent=t('ok');
   MATH={round:1,turn:0,q:null,open:false,answers:{}};
-  if(isNet()&&!NET.isHost){msg('mathFeed',t('waitHost'));return}
+  if(isNet()&&!NET.isHost){$('mathIn').disabled=true;msg('mathFeed',t('waitHost'));return}
   if(isNet())nextMathHost();else nextMathLocal();
 }
 function nextMathLocal(){
-  if(!MATH||MATH.round>2){gameFinished();return}
+  if(!MATH||MATH.round>RD('math',3)){gameFinished();return}
   const p=players[MATH.turn];
   MATH.q=mathQ();MATH.open=true;
-  $('mathTurn').textContent=t('roundOf')(MATH.round,2)+' · '+p.emoji+' '+p.name;
+  $('mathTurn').textContent=t('roundOf')(MATH.round,RD('math',3))+' · '+p.emoji+' '+p.name;
   $('mathQ').textContent=MATH.q.q;
   $('mathIn').value='';$('mathIn').disabled=false;setTimeout(()=>$('mathIn').focus(),60);
   msg('mathFeed',t('typeAns'));
+  if(BOT.active&&!isNet()&&p.name===BOT.name){
+    $('mathIn').disabled=true;msg('mathFeed','🤖 …');
+    later(()=>{if(!MATH||!MATH.open)return;const d=botParams(),acc=CFG.bot.mathAcc[d],ok=Math.random()<acc;$('mathIn').value=ok?MATH.q.a:(MATH.q.a+1+Math.floor(Math.random()*5));submitMath()},CFG.bot.mathDelay[d]);
+    return;
+  }
 }
 function submitMath(){
   if(isNet()&&!NET.isHost){guestMathSend();return}
@@ -2771,14 +2964,14 @@ function submitMath(){
   later(nextMathLocal,1600);
 }
 function nextMathHost(){
-  if(!MATH||MATH.round>5){gameFinished();return}
+  if(!MATH||MATH.round>RD('math',3)){gameFinished();return}
   MATH.q=mathQ();MATH.answers={};MATH.open=true;
-  $('mathTurn').textContent=t('roundOf')(MATH.round,5);
+  $('mathTurn').textContent=t('roundOf')(MATH.round,RD('math',3));
   $('mathQ').textContent=MATH.q.q;
   $('mathIn').value='';$('mathIn').disabled=false;
   msg('mathFeed',t('typeAns'));
   broadcast({t:'math-q',qi:MATH.round,q:MATH.q.q});
-  later(()=>closeMathHost(),12000);
+  later(()=>closeMathHost(),CFG.timeouts.math);
 }
 function hostMathSelf(){
   if(!MATH||!MATH.open||MATH.answers[players[0].name])return;
@@ -2810,7 +3003,7 @@ function startType(){
   $('typeHint').textContent=t('typeHint');
   TYPE={turn:0,words:typeWords(),wi:0,t0:0,total:{},closed:false};
   players.forEach(p=>TYPE.total[p.name]=0);
-  if(isNet()&&!NET.isHost){msg('typeFeed',t('waitHost'));return}
+  if(isNet()&&!NET.isHost){$('typeIn').disabled=true;msg('typeFeed',t('waitHost'));return}
   if(isNet())broadcast({t:'type-words',words:TYPE.words});
   nextTypeTurn();
 }
@@ -2829,7 +3022,7 @@ function nextTypeTurn(){
     if(TYPE.total[p.name]>0){TYPE.turn++;later(nextTypeTurn,300);return}
     setTurnBanner('typeTurn',p,t('watching')(p.name));
     $('typeWord').textContent='…';msg('typeFeed',t('watching')(p.name));
-    const nm=p.name;later(()=>{if(TYPE&&TYPE.turn<players.length&&players[TYPE.turn].name===nm&&!(TYPE.total[nm]>0)){TYPE.total[nm]=9e8;TYPE.turn++;nextTypeTurn()}},60000);
+    const nm=p.name;later(()=>{if(TYPE&&TYPE.turn<players.length&&players[TYPE.turn].name===nm&&!(TYPE.total[nm]>0)){TYPE.total[nm]=9e8;TYPE.turn++;nextTypeTurn()}},CFG.timeouts.type);
     return;
   }
   TYPE.wi=0;TYPE.t0=0;
@@ -2896,14 +3089,14 @@ function startSeq(){
   show('s-seq');renderScores();
   $('seqGo').textContent=t('ok');
   SEQ={round:1,turn:0,q:null,open:false,answers:{}};
-  if(isNet()&&!NET.isHost){msg('seqFeed',t('waitHost'));return}
+  if(isNet()&&!NET.isHost){$('seqIn').disabled=true;msg('seqFeed',t('waitHost'));return}
   if(isNet())nextSeqHost();else nextSeqLocal();
 }
 function nextSeqLocal(){
-  if(!SEQ||SEQ.round>2){gameFinished();return}
+  if(!SEQ||SEQ.round>RD('seq',3)){gameFinished();return}
   const p=players[SEQ.turn];
   SEQ.q=seqQ();SEQ.open=true;
-  $('seqTurn').textContent=t('roundOf')(SEQ.round,2)+' · '+p.emoji+' '+p.name;
+  $('seqTurn').textContent=t('roundOf')(SEQ.round,RD('seq',3))+' · '+p.emoji+' '+p.name;
   $('seqQ').textContent=SEQ.q.q;
   $('seqIn').value='';$('seqIn').disabled=false;setTimeout(()=>$('seqIn').focus(),60);
   msg('seqFeed',t('typeAns'));
@@ -2921,14 +3114,14 @@ function submitSeq(){
   later(nextSeqLocal,1600);
 }
 function nextSeqHost(){
-  if(!SEQ||SEQ.round>4){gameFinished();return}
+  if(!SEQ||SEQ.round>RD('seq',3)){gameFinished();return}
   SEQ.q=seqQ();SEQ.answers={};SEQ.open=true;
-  $('seqTurn').textContent=t('roundOf')(SEQ.round,4);
+  $('seqTurn').textContent=t('roundOf')(SEQ.round,RD('seq',3));
   $('seqQ').textContent=SEQ.q.q;
   $('seqIn').value='';$('seqIn').disabled=false;
   msg('seqFeed',t('typeAns'));
   broadcast({t:'seq-q',qi:SEQ.round,q:SEQ.q.q});
-  later(()=>closeSeqHost(),12000);
+  later(()=>closeSeqHost(),CFG.timeouts.seq);
 }
 function hostSeqSelf(){
   if(!SEQ||!SEQ.open||SEQ.answers[players[0].name])return;
@@ -2965,14 +3158,14 @@ function startScr(){
   show('s-scr');renderScores();
   $('scrGo').textContent=t('ok');
   SCR={round:1,turn:0,w:null,open:false,answers:{}};
-  if(isNet()&&!NET.isHost){msg('scrFeed',t('waitHost'));return}
+  if(isNet()&&!NET.isHost){$('scrIn').disabled=true;msg('scrFeed',t('waitHost'));return}
   if(isNet())nextScrHost();else nextScrLocal();
 }
 function nextScrLocal(){
-  if(!SCR||SCR.round>2){gameFinished();return}
+  if(!SCR||SCR.round>RD('scramble',3)){gameFinished();return}
   const p=players[SCR.turn];
   SCR.w=scrWord();SCR.open=true;
-  $('scrTurn').textContent=t('roundOf')(SCR.round,2)+' · '+p.emoji+' '+p.name;
+  $('scrTurn').textContent=t('roundOf')(SCR.round,RD('scramble',3))+' · '+p.emoji+' '+p.name;
   $('scrQ').textContent=SCR.w.s;
   $('scrIn').value='';$('scrIn').disabled=false;setTimeout(()=>$('scrIn').focus(),60);
   msg('scrFeed',t('typeAns'));
@@ -2990,14 +3183,14 @@ function submitScr(){
   later(nextScrLocal,1600);
 }
 function nextScrHost(){
-  if(!SCR||SCR.round>3){gameFinished();return}
+  if(!SCR||SCR.round>RD('scramble',3)){gameFinished();return}
   SCR.w=scrWord();SCR.answers={};SCR.open=true;
-  $('scrTurn').textContent=t('roundOf')(SCR.round,3);
+  $('scrTurn').textContent=t('roundOf')(SCR.round,RD('scramble',3));
   $('scrQ').textContent=SCR.w.s;
   $('scrIn').value='';$('scrIn').disabled=false;
   msg('scrFeed',t('typeAns'));
   broadcast({t:'scr-q',qi:SCR.round,w:SCR.w.s});
-  later(()=>closeScrHost(),14000);
+  later(()=>closeScrHost(),CFG.timeouts.scr);
 }
 function hostScrSelf(){
   if(!SCR||!SCR.open||SCR.answers[players[0].name])return;
@@ -3034,10 +3227,10 @@ function startStroop(){
 }
 function stroopQA(){const w=STROOPC[Math.floor(Math.random()*4)];let i=STROOPC[Math.floor(Math.random()*4)],g=0;while(i===w&&g++<10)i=STROOPC[Math.floor(Math.random()*4)];return{w,i}}
 function nextStroopTurn(){
-  if(!ST||ST.round>2){gameFinished();return}
+  if(!ST||ST.round>RD('stroop',3)){gameFinished();return}
   const p=players[ST.turn],qa=stroopQA();
   ST.w=qa.w;ST.i=qa.i;ST.open=true;
-  $('stroopTurn').textContent=t('roundOf')(ST.round,2)+' · '+p.emoji+' '+p.name;
+  $('stroopTurn').textContent=t('roundOf')(ST.round,RD('stroop',3))+' · '+p.emoji+' '+p.name;
   $('stroopWord').textContent=stCol(qa.w);$('stroopWord').style.color=STROOPCSS[qa.i];
   $('stroopOpts').innerHTML=shuffle([...STROOPC]).map(k=>`<button class="padbtn" style="background:${STROOPCSS[k]}" onclick="stroopPick('${k}')">&nbsp;</button>`).join('');
   msg('stroopFeed',t('stroopHint'));
@@ -3055,7 +3248,7 @@ function stroopPick(k){
   later(nextStroopTurn,1500);
 }
 function nextStroopHost(){
-  if(!ST||ST.round>5){gameFinished();return}
+  if(!ST||ST.round>RD('stroop',3)){gameFinished();return}
   const qa=stroopQA();ST.w=qa.w;ST.i=qa.i;ST.answers={};ST.open=true;
   $('stroopTurn').textContent=t('roundOf')(ST.round,5);
   $('stroopWord').textContent=stCol(qa.w);$('stroopWord').style.color=STROOPCSS[qa.i];
@@ -3107,10 +3300,10 @@ function oddGridHTML(click){
   return ODD.cells.map((c,i)=>`<button class="touchbtn" style="border-color:${c}" onclick="${click}(${i})"><span class="em" style="color:${c}">●</span></button>`).join('');
 }
 function nextOddTurn(){
-  if(!ODD||ODD.round>2){gameFinished();return}
+  if(!ODD||ODD.round>RD('oddone',3)){gameFinished();return}
   const p=players[ODD.turn],b=oddBoard();
   ODD.cells=b.cells;ODD.odd=b.odd;ODD.open=true;
-  $('oddTurn').textContent=t('roundOf')(ODD.round,2)+' · '+p.emoji+' '+p.name;
+  $('oddTurn').textContent=t('roundOf')(ODD.round,RD('oddone',3))+' · '+p.emoji+' '+p.name;
   $('oddGrid').innerHTML=oddGridHTML('oddPick');
   msg('oddFeed',t('oddHint'));
 }
@@ -3126,7 +3319,7 @@ function oddPick(i){
   later(nextOddTurn,1500);
 }
 function nextOddHost(){
-  if(!ODD||ODD.round>4){gameFinished();return}
+  if(!ODD||ODD.round>RD('oddone',3)){gameFinished();return}
   const b=oddBoard();ODD.cells=b.cells;ODD.odd=b.odd;ODD.answers={};ODD.open=true;
   $('oddTurn').textContent=t('roundOf')(ODD.round,4);
   $('oddGrid').innerHTML=oddGridHTML('oddPick');
@@ -3162,6 +3355,8 @@ function showOnline(){
   $('hostBox').style.display='none';$('joinBox').style.display='none';
   $('joinBtn').disabled=false;$('oGame').textContent='';
   $('hostStartBtn').onclick=hostStartGame;
+  omParty=false;omGames=[];
+  renderOnlineGrid();
   log(t('oHow'));
   if(!peerOK())log(t('needNet'));
 }
@@ -3209,8 +3404,17 @@ function setupGuest(){
 }
 function hostStartGame(){
   if(players.length<2){$('hostStatus').textContent=t('need1');return}
+  if(omParty&&omGames.length<2){$('hostStatus').textContent=t('need2g');beep(200);return}
   $('hostStartBtn').disabled=true;
   players.forEach(p=>p.score=0);
+  if(omParty){
+    TQ={list:[...omGames],idx:0,totals:new Array(players.length).fill(0),online:true};
+    NET.game=TQ.list[0];selectedGame=TQ.list[0];
+    broadcast({t:'game-go',game:NET.game,names:players.map(p=>p.name),scores:players.map(p=>p.score),mult:MULT,party:{games:TQ.list,idx:0},ptot:TQ.totals});
+    $('modeTag').textContent=`🏆 Party 1/${TQ.list.length}`;
+    showIntro(NET.game);return;
+  }
+  TQ=null;
   broadcast({t:'game-go',game:NET.game,names:players.map(p=>p.name),scores:players.map(p=>p.score),mult:MULT});
   showIntro(NET.game);
 }
@@ -3257,14 +3461,16 @@ function hostOnData(c,d){
 function applyScores(arr){(arr||[]).forEach((s,i)=>{if(players[i])players[i].score=s});renderScores()}
 function guestOnData(d){
   if(d.t==='you'){NET.myName=d.name;return}
-  if(d.t==='welcome'||d.t==='lobby'){$('joinStatus').textContent=t('inLobby')((d.names||[]).join(', '));return}
+  if(d.t==='welcome'||d.t==='lobby'){$('joinStatus').textContent=t('inLobby')((d.names||[]).join(', '));$('lobbyList').innerHTML=(d.names||[]).map((n,i)=>`<div class="stand"><span class="avatar" style="background:${COLORS[i%COLORS.length]}">${(n.trim()[0]||'?')}</span><span>${n}</span></div>`).join('');return}
   if(d.t==='game-go'){
     players=d.names.map((n,i)=>({name:n,score:0,key:'-',color:COLORS[i%COLORS.length],emoji:(n.trim()[0]||'?')}));
     applyScores(d.scores);selectedGame=d.game;NET.game=d.game;MULT=d.mult||1;
+    if(d.party){TQ={list:d.party.games,idx:d.party.idx,totals:[...(d.ptot||[])],online:true};$('modeTag').textContent=`🏆 Party ${d.party.idx+1}/${d.party.games.length}`;}else TQ=null;
     showIntro(d.game);later(()=>beginGame(d.game),2500);return;
   }
-  if(d.t==='game-end'){applyScores(d.scores);selectedGame=d.game;showResult();return}
-  if(d.t==='to-menu'){stopAll();routeMenu();return}
+  if(d.t==='game-end'){applyScores(d.scores);selectedGame=d.game;mergeTourney();showResult();return}
+  if(d.t==='party-end'){showTourneyPodium();return}
+  if(d.t==='to-menu'){stopAll();showGames();return}
   if(d.t==='rx-red'){show('s-reaction');renderScores();R={round:d.round,phase:'red',greenAt:0,fouled:new Set(),taps:[]};$('rRound').textContent=t('roundOf')(d.round,3);const st=$('rStage');st.className='big-stage red';$('rTitle').textContent=t('rWait');$('rSub').textContent=t('rWaitNet');$('rKeys').innerHTML='';$('rTouch').innerHTML='';st.onclick=guestTap;msg('rFeed',t('roundOf')(d.round,3));return}
   if(d.t==='rx-green'){if(!R)return;NET.greenAt=d.at;R.phase='green';const st=$('rStage');st.className='big-stage green';$('rTitle').textContent=t('rGo');beep(750);st.onclick=guestTap;return}
   if(d.t==='rx-amber'){if(R&&R.phase==='red'){const st=$('rStage');st.className='big-stage amber';$('rTitle').textContent='🟡 WAIT…';beep(440);setTimeout(()=>{if(R&&R.phase==='red'){st.className='big-stage red';$('rTitle').textContent=t('rWait')}},450)}return}
@@ -3314,11 +3520,11 @@ function guestOnData(d){
   if(d.t==='sim-turn'){show('s-simon');renderScores();GSIM={seq:d.seq,pos:0,accept:false};$('simTurn').textContent=t('roundOf')(d.seq.length-2,'…');simShowSeqGuest();return}
   if(d.t==='sim-out'){msg('simFeed',(()=>{const p=players.find(x=>x.name===d.out);return p?t('tqOut')(p.emoji,d.out):''})(),'lose');return}
   if(d.t==='sim-end'){applyScores(d.scores);if(d.champ){const p=players.find(x=>x.name===d.champ);if(p)msg('simFeed',t('champ')(p.emoji,d.champ),'win')}return}
-  if(d.t==='hm-word'){show('s-hang');renderScores();GHM={word:d.word,guessed:[],miss:0,over:false};hmRenderGuest();msg('hangFeed','');return}
+  if(d.t==='hm-word'){show('s-hang');renderScores();GHM={word:d.word,guessed:[],miss:0,over:false};[...$('hangKeys').children].forEach(b=>{b.disabled=false;b.className='kb'});hmRenderGuest();msg('hangFeed','');return}
   if(d.t==='aim-turn'){show('s-aim');renderScores();AIM={turn:0,round:d.round,pos:0,dir:1,tok:0};$('aimTurn').textContent=t('roundOf')(d.round,2);$('aimBtn').textContent=t('aimStop');if(d.name===NET.myName)runAimLocal(true);else msg('aimFeed',t('watching')(d.name));return}
   if(d.t==='math-q'){show('s-math');renderScores();$('mathGo').textContent=t('ok');$('mathTurn').textContent=t('roundOf')(d.qi,5);$('mathQ').textContent=d.q;$('mathIn').value='';$('mathIn').disabled=false;GMQ=d.qi;msg('mathFeed',t('typeAns'));return}
   if(d.t==='math-show'){applyScores(d.scores);msg('mathFeed',`${d.ans} — `+(d.winners.length?t('tFast')(d.winners[0]):t('tNoOne')));return}
-  if(d.t==='type-words'){show('s-type');renderScores();$('typeHint').textContent=t('typeHint');GTY={words:d.words,wi:0,t0:performance.now(),done:false};setTurnBanner('typeTurn',{name:NET.myName,emoji:'⌨️',color:'#333'},t('yourTurn')('⌨️',NET.myName));$('typeWord').textContent=d.words[0];$('typeIn').value='';msg('typeFeed','1/5');return}
+  if(d.t==='type-words'){show('s-type');renderScores();$('typeHint').textContent=t('typeHint');GTY={words:d.words,wi:0,t0:performance.now(),done:false};setTurnBanner('typeTurn',{name:NET.myName,emoji:'⌨️',color:'#333'},t('yourTurn')('⌨️',NET.myName));$('typeWord').textContent=d.words[0];$('typeIn').value='';$('typeIn').disabled=false;msg('typeFeed','1/5');return}
   if(d.t==='type-end'){applyScores(d.scores);msg('typeFeed',Object.entries(d.totals).map(([n,ms])=>`${n} ${(ms/1000).toFixed(1)}s`).join(' · '));return}
   if(d.t==='seq-q'){show('s-seq');renderScores();$('seqGo').textContent=t('ok');$('seqTurn').textContent=t('roundOf')(d.qi,4);$('seqQ').textContent=d.q;$('seqIn').value='';$('seqIn').disabled=false;GSEQ=d.qi;msg('seqFeed',t('typeAns'));return}
   if(d.t==='seq-show'){applyScores(d.scores);msg('seqFeed',`${d.ans} — `+(d.winners.length?t('tFast')(d.winners[0]):t('tNoOne')));return}

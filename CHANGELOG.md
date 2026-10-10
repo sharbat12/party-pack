@@ -2,6 +2,22 @@
 
 One file: `index.html` (+ `cover.svg`). Everything below lives in it.
 
+## v5.9 — Bots that play (current)
+- Solo CPU now acts in 7 games (reaction, trivia, country, guess, math, clicker, aim) with human delays, per-difficulty skill, DDA rubber-banding
+- Procedural WebAudio music loop tied to the mute toggle
+- Poker economy centralized in CFG
+
+## v5.8 — Multiplayer honesty + more (current)
+- Guests see live player list when joining; all guest buttons stay dead until it's really their turn
+- 12 player colors, up to 10 players
+- QUICK PLAY button: instant random game, 2 players, no setup
+- 20 words per language (longer, harder) — shared by type/scramble/hangman
+
+## v5.7 — Online party mode (current)
+- Host picks 2–5 games (or single) in the lobby, group plays them in order with running totals + final podium
+- Guests auto-follow, see party progress + live totals
+- Fixed: duplicate nicknames, double starts, stale peers, bingo tally wait
+
 ## v5.6 — Typo forgiveness (current)
 - Country accepts close spellings (ISRAL → ISRAEL): 1 typo allowed up to 7 letters, 2 for longer, exact only for short names, first letter must match
 
